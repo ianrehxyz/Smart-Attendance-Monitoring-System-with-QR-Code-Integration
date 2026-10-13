@@ -3,167 +3,196 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Smart Attendance System</title>
+  <title>Register & Login - TCU Smart Attendance System</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
-    body { background-color: #0d1117; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #ed1c24; position: sticky; top: 0; z-index: 100; }
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-red: #ed1c24;
+      --accent-gold: #fca311;
+      --accent-blue: #1a4da6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid var(--accent-red); position: sticky; top: 0; z-index: 100; }
     nav { max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
     .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 700; }
     .logo-container img { height: 48px; width: auto; object-fit: contain; }
     .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
-    .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: #fca311; }
-    .btn-login { background-color: #1a4da6; color: #fff !important; padding: 0.4rem 1rem; border-radius: 6px; font-weight: 600 !important; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent-gold); }
+    .btn-login-nav { background-color: var(--accent-red); color: #fff !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; }
 
-    .main-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1rem; }
-    .register-card { background: #161b22; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; max-width: 520px; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
-    .card-header { text-align: center; margin-bottom: 1.5rem; }
-    .card-header h2 { font-size: 1.5rem; color: #fff; font-weight: 700; margin-bottom: 0.35rem; }
-    .card-header p { font-size: 0.875rem; color: #94a3b8; }
+    .main-container { max-width: 500px; margin: 2rem auto; width: 100%; padding: 0 1rem; flex: 1; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 2rem; }
+    .card-title { font-size: 1.5rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 0.5rem; }
+    .card-subtitle { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem; }
 
-    .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: #0d1117; padding: 0.35rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.08); }
-    .role-btn { padding: 0.6rem; border: none; background: transparent; color: #94a3b8; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-    .role-btn.active-student { background: #ed1c24; color: #fff; }
-    .role-btn.active-faculty { background: #1a4da6; color: #fff; }
+    .role-switch { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+    .role-btn { flex: 1; padding: 0.6rem; border: 1px solid var(--border-color); background: #0d1117; color: var(--text-secondary); font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; font-size: 0.9rem; }
+    .role-btn.active-student { background: var(--accent-gold); color: #0d1117; border-color: var(--accent-gold); }
+    .role-btn.active-faculty { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
 
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem; }
-    .form-control { width: 100%; padding: 0.75rem 0.9rem; background-color: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
-    .form-control:focus { border-color: #fca311; }
-    
-    .btn-submit { width: 100%; padding: 0.85rem; border: none; border-radius: 6px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; margin-top: 0.5rem; }
-    .btn-submit-student { background-color: #ed1c24; color: #fff; }
-    .btn-submit-student:hover { background-color: #c1171d; }
-    .btn-submit-faculty { background-color: #1a4da6; color: #fff; }
-    .btn-submit-faculty:hover { background-color: #143b85; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
+    .form-control { width: 100%; padding: 0.7rem; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
+    .form-control:focus { border-color: var(--accent-gold); }
 
-    .login-redirect { text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: #94a3b8; }
-    .login-redirect a { color: #fca311; text-decoration: none; font-weight: 600; }
+    .btn-submit { width: 100%; padding: 0.8rem; background: var(--accent-gold); color: #0d1117; border: none; border-radius: 6px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; }
+    .btn-submit:hover { background: #e0920a; }
+
+    .switch-mode { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .switch-mode a { color: var(--accent-gold); text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>
 
   <header>
     <nav>
+      <!-- Naayos na: Nakaturo na sa index.html -->
       <a href="index.html" class="logo-container">
         <img src="TCU_logo_2024.png" alt="TCU Logo">
         <span>TCU Attendance</span>
       </a>
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="studentpageproject.html">Student Portal</a></li>
+        <li><a href="studentprojectpage.html">Student Portal</a></li>
         <li><a href="facultypageproject.html">Faculty Portal</a></li>
-        <li><a href="logpageproject.html" class="btn-login">Login</a></li>
+        <li><a href="logpageproject.html" class="btn-login-nav">Login</a></li>
       </ul>
     </nav>
   </header>
 
   <main class="main-container">
-    <div class="register-card">
-      <div class="card-header">
-        <h2 id="form-title">Create Faculty Account</h2>
-        <p id="form-subtitle">Register your details for class QR tracking</p>
-      </div>
+    <div class="card">
+      <h2 class="card-title" id="formTitle">Create Student Account</h2>
+      <p class="card-subtitle" id="formSubtitle">Register your details for attendance tracking</p>
 
-      <div class="role-selector">
-        <button type="button" class="role-btn" id="btn-role-student" onclick="setRole('student')">Student</button>
-        <button type="button" class="role-btn active-faculty" id="btn-role-faculty" onclick="setRole('faculty')">Faculty</button>
+      <div class="role-switch">
+        <div class="role-btn active-student" id="btnStudent" onclick="switchRole('student')">Student</div>
+        <div class="role-btn" id="btnFaculty" onclick="switchRole('faculty')">Faculty</div>
       </div>
 
       <form id="registerForm" onsubmit="handleRegister(event)">
         <div class="form-group">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" class="form-control" placeholder="e.g., Adrianne Rey Cadangan" required>
+          <label>Full Name</label>
+          <input type="text" id="regName" class="form-control" placeholder="e.g., Adrianne Rey Cadangan" required>
         </div>
 
         <div class="form-group">
-          <label for="idNumber" id="lbl-idNumber">Faculty ID Number</label>
-          <input type="text" id="idNumber" class="form-control" placeholder="e.g., FAC-2026-0891" required>
+          <label id="idLabel">Student ID Number</label>
+          <input type="text" id="regId" class="form-control" placeholder="e.g., 2026-100234" required>
         </div>
 
         <div class="form-group">
-          <label for="email">TCU Email Address</label>
-          <input type="email" id="email" class="form-control" placeholder="username@tcu.edu.ph" required>
+          <label>TCU Email Address</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="username@tcu.edu.ph" required>
         </div>
 
-        <div class="form-group" id="dept-group">
-          <label for="department">Department / Program</label>
-          <select id="department" class="form-control">
+        <div class="form-group">
+          <label id="deptLabel">Department / Program</label>
+          <select id="regDept" class="form-control">
             <option value="BS Information Systems">BS Information Systems</option>
-            <option value="BS Business Administration">BS Business Administration</option>
             <option value="BS Computer Science">BS Computer Science</option>
-            <option value="College of Education">College of Education</option>
+            <option value="BS Business Administration">BS Business Administration</option>
+            <option value="BS Engineering">BS Engineering</option>
+            <option value="BS Education">BS Education</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+          <label>Password</label>
+          <input type="password" id="regPass" class="form-control" placeholder="••••••••" required>
         </div>
 
-        <button type="submit" id="btn-submit" class="btn-submit btn-submit-faculty">Complete Registration</button>
+        <button type="submit" class="btn-submit" id="regSubmitBtn">Register Student Account</button>
       </form>
 
-      <div class="login-redirect">
-        Already registered? <a href="logpageproject.html">Sign In</a>
+      <div class="switch-mode">
+        Already have an account? <a href="logpageproject.html">Login here</a>
       </div>
     </div>
   </main>
 
   <script>
-    let currentRole = 'faculty';
+    let currentRole = 'student';
 
-    function setRole(role) {
+    function switchRole(role) {
       currentRole = role;
-      const btnStudent = document.getElementById('btn-role-student');
-      const btnFaculty = document.getElementById('btn-role-faculty');
-      const formTitle = document.getElementById('form-title');
-      const lblId = document.getElementById('lbl-idNumber');
-      const idInput = document.getElementById('idNumber');
-      const submitBtn = document.getElementById('btn-submit');
+      const btnStu = document.getElementById('btnStudent');
+      const btnFac = document.getElementById('btnFaculty');
+      const title = document.getElementById('formTitle');
+      const sub = document.getElementById('formSubtitle');
+      const idLbl = document.getElementById('idLabel');
+      const deptLbl = document.getElementById('deptLabel');
+      const subBtn = document.getElementById('regSubmitBtn');
 
       if (role === 'student') {
-        btnStudent.className = 'role-btn active-student';
-        btnFaculty.className = 'role-btn';
-        formTitle.textContent = 'Create Student Account';
-        lblId.textContent = 'Student ID Number';
-        idInput.placeholder = 'e.g., 2026-100234';
-        submitBtn.className = 'btn-submit btn-submit-student';
+        btnStu.className = 'role-btn active-student';
+        btnFac.className = 'role-btn';
+        title.textContent = 'Create Student Account';
+        sub.textContent = 'Register your details for attendance tracking';
+        idLbl.textContent = 'Student ID Number';
+        deptLbl.textContent = 'Department / Program';
+        subBtn.textContent = 'Register Student Account';
+        subBtn.style.background = '#fca311';
+        subBtn.style.color = '#0d1117';
       } else {
-        btnFaculty.className = 'role-btn active-faculty';
-        btnStudent.className = 'role-btn';
-        formTitle.textContent = 'Create Faculty Account';
-        lblId.textContent = 'Faculty ID Number';
-        idInput.placeholder = 'e.g., FAC-2026-0891';
-        submitBtn.className = 'btn-submit btn-submit-faculty';
+        btnFac.className = 'role-btn active-faculty';
+        btnStu.className = 'role-btn';
+        title.textContent = 'Create Faculty Account';
+        sub.textContent = 'Register your details for class QR tracking';
+        idLbl.textContent = 'Faculty ID Number';
+        deptLbl.textContent = 'Department / College';
+        subBtn.textContent = 'Register Faculty Account';
+        subBtn.style.background = '#1a4da6';
+        subBtn.style.color = '#fff';
       }
     }
 
-    function handleRegister(event) {
-      event.preventDefault();
-      
-      const fullName = document.getElementById('fullName').value.trim();
-      const idNumber = document.getElementById('idNumber').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const department = document.getElementById('department').value;
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const id = document.getElementById('regId').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const department = document.getElementById('regDept').value;
+      const pass = document.getElementById('regPass').value;
 
-      const userData = {
-        name: fullName,
-        id: idNumber,
-        email: email,
-        department: department
-      };
+      const userData = { name, id, email, department, pass };
 
-      if (currentRole === 'faculty') {
-        localStorage.setItem('tcu_faculty_user', JSON.stringify(userData));
-        alert(`Welcome Prof. ${fullName}! Redirecting to Faculty Dashboard...`);
-        window.location.href = 'facultypageproject.html';
+      if (currentRole === 'student') {
+        let students = JSON.parse(localStorage.getItem('tcu_registered_students')) || [];
+        
+        const existing = students.find(s => s.id === id || s.email === email);
+        if (existing) {
+          alert('Error: Student ID or Email is already registered!');
+          return;
+        }
+
+        students.push(userData);
+        localStorage.setItem('tcu_registered_students', JSON.stringify(students));
+        
+        alert('Student account registered successfully! Please proceed to login.');
+        window.location.href = 'logpageproject.html';
       } else {
-        localStorage.setItem('tcu_student_user', JSON.stringify(userData));
-        alert(`Welcome ${fullName}! Redirecting to Student Dashboard...`);
-        window.location.href = 'studentprojectpage.html';
+        let facultyList = JSON.parse(localStorage.getItem('tcu_registered_faculty')) || [];
+        
+        const existing = facultyList.find(f => f.id === id || f.email === email);
+        if (existing) {
+          alert('Error: Faculty ID or Email is already registered!');
+          return;
+        }
+
+        facultyList.push(userData);
+        localStorage.setItem('tcu_registered_faculty', JSON.stringify(facultyList));
+
+        alert('Faculty account registered successfully! Please proceed to login.');
+        window.location.href = 'logpageproject.html';
       }
     }
   </script>
