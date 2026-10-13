@@ -3,123 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Smart Attendance System</title>
+  <title>Portal Login - TCU Smart Attendance System</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
-    body { background-color: #0d1117; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
-    
-    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #ed1c24; position: sticky; top: 0; z-index: 100; }
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-red: #ed1c24;
+      --accent-gold: #fca311;
+      --accent-blue: #1a4da6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid var(--accent-red); position: sticky; top: 0; z-index: 100; }
     nav { max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
     .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 700; }
     .logo-container img { height: 48px; width: auto; object-fit: contain; }
     .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
-    .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: #fca311; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent-gold); }
 
-    .main-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1rem; }
-    .login-card { background: #161b22; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; width: 100%; max-width: 420px; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
-    .card-header { text-align: center; margin-bottom: 1.5rem; }
-    .card-header h2 { font-size: 1.5rem; color: #fff; font-weight: 700; margin-bottom: 0.35rem; }
-    
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem; }
-    .form-control { width: 100%; padding: 0.75rem 0.9rem; background-color: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.9rem; outline: none; }
-    .form-control:focus { border-color: #fca311; }
+    .main-container { max-width: 450px; margin: 3rem auto; width: 100%; padding: 0 1rem; flex: 1; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 2rem; }
+    .card-title { font-size: 1.5rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 0.5rem; }
+    .card-subtitle { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem; }
 
-    .btn-submit { width: 100%; padding: 0.85rem; background-color: #1a4da6; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: background 0.2s; }
-    .btn-submit:hover { background-color: #143b85; }
-    
-    .redirect-link { text-align: center; margin-top: 1.25rem; font-size: 0.85rem; color: #94a3b8; }
-    .redirect-link a { color: #fca311; text-decoration: none; font-weight: 600; }
+    .role-switch { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+    .role-btn { flex: 1; padding: 0.6rem; border: 1px solid var(--border-color); background: #0d1117; color: var(--text-secondary); font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; font-size: 0.9rem; }
+    .role-btn.active-student { background: var(--accent-gold); color: #0d1117; border-color: var(--accent-gold); }
+    .role-btn.active-faculty { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+    .form-group { display: flex; flex-direction: column; margin-bottom: 1.2rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
+    .form-control { width: 100%; padding: 0.75rem; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
+    .form-control:focus { border-color: var(--accent-gold); }
+
+    .btn-submit { width: 100%; padding: 0.8rem; background: var(--accent-gold); color: #0d1117; border: none; border-radius: 6px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; transition: background 0.2s; }
+    .btn-submit:hover { background: #e0920a; }
+
+    .switch-mode { text-align: center; margin-top: 1.2rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .switch-mode a { color: var(--accent-gold); text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>
 
   <header>
     <nav>
-      <a href="index.html" class="logo-container">
+      <a href="landingpageproject.html" class="logo-container">
         <img src="TCU_logo_2024.png" alt="TCU Logo">
         <span>TCU Attendance</span>
       </a>
       <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
+        <li><a href="landingpageproject.html">Home</a></li>
         <li><a href="registerpageproject.html">Register</a></li>
       </ul>
     </nav>
   </header>
 
   <main class="main-container">
-    <div class="login-card">
-      <div class="card-header">
-        <h2>Portal Login</h2>
-        <p style="color: #94a3b8; font-size: 0.85rem;">Sign in using your registered ID or email</p>
+    <div class="card">
+      <h2 class="card-title" id="loginTitle">Student Portal Login</h2>
+      <p class="card-subtitle" id="loginSubtitle">Sign in using your registered ID or email</p>
+
+      <div class="role-switch">
+        <div class="role-btn active-student" id="btnStudentLogin" onclick="switchLoginRole('student')">Student Login</div>
+        <div class="role-btn" id="btnFacultyLogin" onclick="switchLoginRole('faculty')">Faculty Login</div>
       </div>
 
-      <form onsubmit="handleLogin(event)">
+      <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
-          <label>ID Number or Email</label>
-          <input type="text" id="loginInput" class="form-control" placeholder="e.g. 2026-100234 or FAC-..." required>
+          <label id="loginIdLabel">Student ID or Email</label>
+          <input type="text" id="loginId" class="form-control" placeholder="e.g. 2026-100234 or email@tcu.edu.ph" required>
         </div>
+
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+          <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-submit">Sign In</button>
+
+        <button type="submit" class="btn-submit" id="loginSubmitBtn">Sign In as Student</button>
       </form>
 
-      <div class="redirect-link">
+      <div class="switch-mode">
         Don't have an account? <a href="registerpageproject.html">Register Here</a>
       </div>
     </div>
   </main>
 
   <script>
+    let loginRole = 'student';
+
+    function switchLoginRole(role) {
+      loginRole = role;
+      const btnStu = document.getElementById('btnStudentLogin');
+      const btnFac = document.getElementById('btnFacultyLogin');
+      const title = document.getElementById('loginTitle');
+      const sub = document.getElementById('loginSubtitle');
+      const idLbl = document.getElementById('loginIdLabel');
+      const subBtn = document.getElementById('loginSubmitBtn');
+
+      if (role === 'student') {
+        btnStu.className = 'role-btn active-student';
+        btnFac.className = 'role-btn';
+        title.textContent = 'Student Portal Login';
+        sub.textContent = 'Sign in using your registered ID or email';
+        idLbl.textContent = 'Student ID or Email';
+        subBtn.textContent = 'Sign In as Student';
+        subBtn.style.background = '#fca311';
+        subBtn.style.color = '#0d1117';
+      } else {
+        btnFac.className = 'role-btn active-faculty';
+        btnStu.className = 'role-btn';
+        title.textContent = 'Faculty Portal Login';
+        sub.textContent = 'Sign in using your Faculty ID or email';
+        idLbl.textContent = 'Faculty ID or Email';
+        subBtn.textContent = 'Sign In as Faculty';
+        subBtn.style.background = '#1a4da6';
+        subBtn.style.color = '#fff';
+      }
+    }
+
     function handleLogin(e) {
       e.preventDefault();
-      const inputVal = document.getElementById('loginInput').value.trim().toLowerCase();
+      const inputId = document.getElementById('loginId').value.trim();
+      const inputPass = document.getElementById('loginPass').value;
 
-      // 1. Kunin ang mga nakasa-save na data mula sa registration
-      const savedFaculty = localStorage.getItem('tcu_faculty_user');
-      const savedStudent = localStorage.getItem('tcu_student_user');
+      if (loginRole === 'student') {
+        // Kunin ang mga nakarehistrong estudyante mula sa localStorage
+        const students = JSON.parse(localStorage.getItem('tcu_registered_students')) || [];
+        const foundStudent = students.find(s => (s.id === inputId || s.email === inputId) && s.pass === inputPass);
 
-      let foundFaculty = savedFaculty ? JSON.parse(savedFaculty) : null;
-      let foundStudent = savedStudent ? JSON.parse(savedStudent) : null;
-
-      // 2. Suriin kung ang in-input ay tumutugma sa Faculty account
-      const isFacultyMatch = foundFaculty && (
-        foundFaculty.id.toLowerCase() === inputVal || 
-        foundFaculty.email.toLowerCase() === inputVal ||
-        foundFaculty.name.toLowerCase().includes(inputVal)
-      );
-
-      // 3. Suriin kung ang in-input ay tumutugma sa Student account
-      const isStudentMatch = foundStudent && (
-        foundStudent.id.toLowerCase() === inputVal || 
-        foundStudent.email.toLowerCase() === inputVal ||
-        foundStudent.name.toLowerCase().includes(inputVal)
-      );
-
-      if (isFacultyMatch) {
-        alert(`Login Successful! Welcome back, Prof. ${foundFaculty.name}`);
-        window.location.href = 'facultypageproject.html';
-        return;
-      }
-
-      if (isStudentMatch) {
-        alert(`Login Successful! Welcome back, ${foundStudent.name}`);
-        window.location.href = 'studentprojectpage.html';
-        return;
-      }
-
-      // 4. Fallback kung walang nahanap sa LocalStorage pero nag-type ng may 'FAC' o email extension
-      if (inputVal.includes('fac') || inputVal.includes('@tcu.edu.ph')) {
-        alert('Logging in as Faculty...');
-        window.location.href = 'facultypageproject.html';
-      } else if (inputVal.length > 0) {
-        alert('Logging in as Student...');
-        window.location.href = 'studentprojectpage.html'; // Naayos na: Nakaturo na sa tamang file
+        if (foundStudent) {
+          localStorage.setItem('tcu_student_user', JSON.stringify(foundStudent));
+          alert('Student login successful! Welcome back, ' + foundStudent.name);
+          window.location.href = 'studentprojectpage.html';
+        } else {
+          alert('Access Denied: Student account not found or incorrect password. Please register first.');
+        }
       } else {
-        alert('Please enter a valid ID or email.');
+        // Kunin ang mga nakarehistrong faculty mula sa localStorage
+        const facultyList = JSON.parse(localStorage.getItem('tcu_registered_faculty')) || [];
+        const foundFaculty = facultyList.find(f => (f.id === inputId || f.email === inputId) && f.pass === inputPass);
+
+        if (foundFaculty) {
+          localStorage.setItem('tcu_faculty_user', JSON.stringify(foundFaculty));
+          alert('Faculty login successful! Welcome back, Prof. ' + foundFaculty.name);
+          window.location.href = 'facultypageproject.html';
+        } else {
+          alert('Access Denied: Faculty account not found or incorrect password. Please register first.');
+        }
       }
     }
   </script>
