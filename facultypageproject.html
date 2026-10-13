@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Dashboard - Smart Attendance System</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-color: #1a4da6;
+      --badge-text: #38bdf8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #ed1c24; position: sticky; top: 0; z-index: 100; }
+    nav { max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 700; }
+    .logo-container img { height: 48px; width: auto; object-fit: contain; }
+    .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: #fca311; }
+    .btn-logout { background-color: #ed1c24; color: #fff !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; cursor: pointer; }
+
+    .dashboard-container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; flex: 1; }
+
+    .welcome-banner { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .welcome-text h1 { font-size: 1.5rem; color: #fff; margin-bottom: 0.25rem; }
+    .welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
+    .faculty-badge { background: rgba(26, 77, 166, 0.2); color: var(--badge-text); border: 1px solid var(--accent-color); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
+    .form-control { width: 100%; padding: 0.65rem; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
+
+    .btn-action { background: #1a4da6; color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-action:hover { background: #143b85; }
+
+    .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .class-card { background: #0d1117; border: 1px solid var(--border-color); border-left: 4px solid #fca311; border-radius: 8px; padding: 1rem; position: relative; cursor: pointer; transition: border-color 0.2s; }
+    .class-card.active { border-color: #22c55e; background: rgba(34, 197, 94, 0.05); }
+    .class-card h4 { font-size: 1rem; color: #fff; margin-bottom: 0.4rem; }
+    .class-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.2rem; }
+    .class-card .btn-delete-class { position: absolute; top: 0.75rem; right: 0.75rem; background: transparent; border: none; color: #f87171; font-weight: bold; cursor: pointer; font-size: 1rem; }
+
+    .filter-bar { display: flex; gap: 1rem; background: #0d1117; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.25rem; flex-wrap: wrap; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 10px; }
+    .stat-card .label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
+    .stat-card .value { font-size: 1.8rem; font-weight: 800; color: #fff; margin-top: 0.25rem; }
+
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    th { color: var(--text-secondary); font-weight: 600; }
+    
+    .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+    .status-present { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .status-late { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+    .status-out { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="landingpageproject.html" class="logo-container">
+        <img src="TCU_logo_2024.png" alt="TCU Logo">
+        <span>TCU Faculty Portal</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="landingpageproject.html">Home</a></li>
+        <li><a href="registerpageproject.html">Register</a></li>
+        <li><a href="logpageproject.html" class="btn-logout" onclick="logout()">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h1 id="faculty-name-heading">Welcome back, Professor!</h1>
+        <p id="faculty-info-sub">Faculty ID: Loading... | Email: Loading...</p>
+      </div>
+      <div>
+        <span class="faculty-badge" id="faculty-dept-badge">College of Information Systems</span>
+      </div>
+    </div>
+
+    <!-- Department & Section Management -->
+    <div class="card">
+      <div class="card-title">
+        <span>➕ Add Department & Section Assignment</span>
+      </div>
+      <form onsubmit="handleAddClass(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="newDept">Department / College</label>
+            <select id="newDept" class="form-control" required>
+              <option value="College of Information Systems">College of Information Systems</option>
+              <option value="College of Business Administration">College of Business Administration</option>
+              <option value="College of Computer Science">College of Computer Science</option>
+              <option value="College of Engineering">College of Engineering</option>
+              <option value="College of Education">College of Education</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="newSection">Section</label>
+            <input type="text" id="newSection" class="form-control" placeholder="e.g. BSIS 1C" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newRoom">Room Assignment</label>
+            <input type="text" id="newRoom" class="form-control" placeholder="e.g. 308" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-action" style="margin-top: 1rem;">+ Add Class</button>
+      </form>
+
+      <div style="margin-top: 1.5rem;">
+        <h4 style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.5rem;">Select Class Assignment to View Specific Attendance:</h4>
+        <div class="class-grid" id="assignedClassesContainer"></div>
+      </div>
+    </div>
+
+    <!-- Attendance Record Filter Controls -->
+    <div class="card">
+      <div class="card-title">
+        <span>📊 Department & Section Attendance Records (Honor Privacy)</span>
+        <button class="btn-action" style="padding: 0.35rem 0.75rem;" onclick="loadAttendanceRecords()">🔄 Refresh Data</button>
+      </div>
+
+      <div class="filter-bar">
+        <div class="form-group" style="flex: 1; min-width: 200px;">
+          <label for="filterDept">Filter by Department</label>
+          <select id="filterDept" class="form-control" onchange="loadAttendanceRecords()">
+            <option value="ALL">All Departments</option>
+            <option value="College of Information Systems">College of Information Systems</option>
+            <option value="College of Business Administration">College of Business Administration</option>
+            <option value="College of Computer Science">College of Computer Science</option>
+            <option value="College of Engineering">College of Engineering</option>
+            <option value="College of Education">College of Education</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="flex: 1; min-width: 200px;">
+          <label for="filterSection">Filter by Section / Subject Code</label>
+          <input type="text" id="filterSection" class="form-control" placeholder="Type section/subject e.g. BSIS 1C, CC 101" oninput="loadAttendanceRecords()">
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Public Submissions</div>
+          <div class="value" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Present</div>
+          <div class="value" style="color: #4ade80;" id="stat-present">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Late</div>
+          <div class="value" style="color: #facc15;" id="stat-late">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Signed Out</div>
+          <div class="value" style="color: #f87171;" id="stat-out">0</div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Student ID</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Subject / Section</th>
+              <th>Room</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="facultyTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let defaultClasses = [
+      { dept: "College of Information Systems", section: "BSIS 1C", room: "308" },
+      { dept: "College of Computer Science", section: "BSCS 2B", room: "COMPLAB111" }
+    ];
+
+    let selectedClassIndex = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('tcu_faculty_user');
+      
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. ${user.name}!`;
+        document.getElementById('faculty-info-sub').textContent = `Faculty ID: ${user.id} | Email: ${user.email}`;
+        document.getElementById('faculty-dept-badge').textContent = user.department;
+      } else {
+        document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. Adrianne Rey Cadangan!`;
+        document.getElementById('faculty-info-sub').textContent = `Faculty ID: FAC-2026-0891 | Email: adrianne@tcu.edu.ph`;
+        document.getElementById('faculty-dept-badge').textContent = `College of Information Systems`;
+      }
+
+      renderAssignedClasses();
+      loadAttendanceRecords();
+    });
+
+    function getStoredClasses() {
+      const stored = localStorage.getItem('tcu_faculty_classes');
+      return stored ? JSON.parse(stored) : defaultClasses;
+    }
+
+    function renderAssignedClasses() {
+      const container = document.getElementById('assignedClassesContainer');
+      const classesList = getStoredClasses();
+      container.innerHTML = '';
+
+      if (classesList.length === 0) {
+        container.innerHTML = `<p style="font-size: 0.85rem; color: #94a3b8;">No class assignments added yet.</p>`;
+        return;
+      }
+
+      classesList.forEach((cls, index) => {
+        const card = document.createElement('div');
+        card.className = `class-card ${selectedClassIndex === index ? 'active' : ''}`;
+        card.onclick = () => selectClassFilter(index, cls);
+
+        card.innerHTML = `
+          <button class="btn-delete-class" onclick="removeClass(event, ${index})">&times;</button>
+          <h4>${cls.section}</h4>
+          <p>🏫 <b>Dept:</b> ${cls.dept}</p>
+          <p>📍 <b>Room:</b> ${cls.room}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function selectClassFilter(index, cls) {
+      if (selectedClassIndex === index) {
+        selectedClassIndex = null;
+        document.getElementById('filterDept').value = 'ALL';
+        document.getElementById('filterSection').value = '';
+      } else {
+        selectedClassIndex = index;
+        document.getElementById('filterDept').value = cls.dept;
+        document.getElementById('filterSection').value = cls.section;
+      }
+      renderAssignedClasses();
+      loadAttendanceRecords();
+    }
+
+    function handleAddClass(e) {
+      e.preventDefault();
+      const dept = document.getElementById('newDept').value;
+      const section = document.getElementById('newSection').value.trim();
+      const room = document.getElementById('newRoom').value.trim();
+
+      const classesList = getStoredClasses();
+      classesList.push({ dept, section, room });
+
+      localStorage.setItem('tcu_faculty_classes', JSON.stringify(classesList));
+
+      document.getElementById('newSection').value = '';
+      document.getElementById('newRoom').value = '';
+
+      renderAssignedClasses();
+      alert(`Class ${section} (${room}) successfully added!`);
+    }
+
+    function removeClass(e, index) {
+      e.stopPropagation();
+      let classesList = getStoredClasses();
+      const targetClass = classesList[index];
+
+      const confirmed = confirm(`Are you sure you want to remove ${targetClass ? targetClass.section : 'this class assignment'}? This action cannot be undone.`);
+      
+      if (confirmed) {
+        classesList.splice(index, 1);
+        localStorage.setItem('tcu_faculty_classes', JSON.stringify(classesList));
+        if (selectedClassIndex === index) selectedClassIndex = null;
+        renderAssignedClasses();
+        loadAttendanceRecords();
+      }
+    }
+
+    function loadAttendanceRecords() {
+      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+      const tbody = document.getElementById('facultyTableBody');
+      tbody.innerHTML = '';
+
+      const deptFilter = document.getElementById('filterDept').value;
+      const sectionFilter = document.getElementById('filterSection').value.trim().toLowerCase();
+
+      // Filter records and strictly honor student privacy setting (isPublic !== false)
+      const filteredRecords = records.filter(rec => {
+        if (rec.isPublic === false) return false; // Skip private records
+
+        const matchDept = (deptFilter === 'ALL') || (rec.department === deptFilter || deptFilter === 'College of Information Systems');
+        const subjectOrSection = (rec.subjectCode || '').toLowerCase();
+        const matchSection = !sectionFilter || subjectOrSection.includes(sectionFilter);
+
+        return matchDept && matchSection;
+      });
+
+      let presentCount = 0;
+      let lateCount = 0;
+      let outCount = 0;
+
+      if (filteredRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #94a3b8; padding: 1.5rem;">No public attendance entries found.</td></tr>`;
+      } else {
+        filteredRecords.forEach(rec => {
+          let badgeClass = 'status-present';
+          if (rec.status === 'PRESENT') { presentCount++; badgeClass = 'status-present'; }
+          else if (rec.status === 'LATE') { lateCount++; badgeClass = 'status-late'; }
+          else if (rec.status === 'SIGNED_OUT') { outCount++; badgeClass = 'status-out'; }
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${rec.timestamp}</td>
+            <td><b>${rec.studentId}</b></td>
+            <td>${rec.fullName}</td>
+            <td>${rec.email}</td>
+            <td>${rec.subjectCode}</td>
+            <td>${rec.room}</td>
+            <td>${rec.type}</td>
+            <td><span class="status-badge ${badgeClass}">${rec.status}</span></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('stat-total').textContent = filteredRecords.length;
+      document.getElementById('stat-present').textContent = presentCount;
+      document.getElementById('stat-late').textContent = lateCount;
+      document.getElementById('stat-out').textContent = outCount;
+    }
+
+    function logout() {
+      localStorage.removeItem('tcu_faculty_user');
+      window.location.href = 'register.html';
+    }
+  </script>
+</body>
+</html>

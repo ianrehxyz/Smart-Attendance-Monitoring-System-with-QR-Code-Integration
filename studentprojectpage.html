@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal - Attendance & Privacy Settings</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-color: #ed1c24;
+      --badge-text: #fca311;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid #ed1c24; position: sticky; top: 0; z-index: 100; }
+    nav { max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 700; }
+    .logo-container img { height: 48px; width: auto; object-fit: contain; }
+    .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: #fca311; }
+    .btn-logout { background-color: #ed1c24; color: #fff !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; cursor: pointer; }
+
+    .dashboard-container { max-width: 1100px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; flex: 1; }
+
+    .welcome-banner { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .welcome-text h1 { font-size: 1.5rem; color: #fff; margin-bottom: 0.25rem; }
+    .welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
+    .student-badge { background: rgba(237, 28, 36, 0.2); color: var(--badge-text); border: 1px solid #ed1c24; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+
+    .upload-area { border: 2px dashed rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 1.25rem; text-align: center; background: #0d1117; cursor: pointer; margin-bottom: 0.8rem; transition: border-color 0.2s; }
+    .upload-area:hover { border-color: #fca311; }
+    .schedule-img-preview { width: 100%; max-height: 450px; object-fit: contain; border-radius: 6px; margin-top: 0.8rem; display: none; border: 1px solid var(--border-color); background-color: #0d1117; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
+    .form-control { width: 100%; padding: 0.65rem; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
+    .form-control:focus { border-color: #fca311; }
+    .form-control[readonly] { background: #1f2937; color: #94a3b8; }
+
+    .type-selector { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+    .type-btn { flex: 1; padding: 0.6rem; border: 1px solid var(--border-color); background: #0d1117; color: var(--text-secondary); font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; font-size: 0.85rem; }
+    .type-btn.active-in { background: #22c55e; color: #0d1117; border-color: #22c55e; }
+    .type-btn.active-out { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+    /* Privacy Toggle Switch */
+    .privacy-box { display: flex; align-items: center; justify-content: space-between; background: #0d1117; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 1rem; }
+    .privacy-box label { font-size: 0.825rem; font-weight: 600; color: #cbd5e1; cursor: pointer; }
+    .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .3s; border-radius: 22px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: #22c55e; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    .btn-submit { width: 100%; padding: 0.8rem; background: #fca311; color: #0d1117; border: none; border-radius: 6px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1.25rem; }
+    .btn-submit:hover { background: #e0920a; }
+
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.35rem; text-align: center; }
+    .cal-day-name { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); padding-bottom: 0.25rem; }
+    .cal-date { aspect-ratio: 1; background: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; position: relative; }
+    .cal-date.present { background: rgba(34, 197, 94, 0.25); border-color: #22c55e; color: #4ade80; }
+    .cal-date.late { background: rgba(234, 179, 8, 0.25); border-color: #eab308; color: #facc15; }
+    .cal-date.absent { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f87171; }
+    .cal-date.today { border: 2px solid #fca311; }
+
+    .legend-container { display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.75rem; color: var(--text-secondary); justify-content: center; }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="landingpageproject.html" class="logo-container">
+        <img src="TCU_logo_2024.png" alt="TCU Logo">
+        <span>TCU Student Portal</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="landingpageproject.html">Home</a></li>
+        <li><a href="registerpageproject.html">Register</a></li>
+        <li><a href="logpageproject.html" class="btn-logout" onclick="logout()">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h1 id="student-name-heading">Welcome back, Student!</h1>
+        <p id="student-info-sub">Student ID: Loading... | Email: Loading...</p>
+      </div>
+      <span class="student-badge" id="student-course-badge">BS Information Systems</span>
+    </div>
+
+    <!-- Schedule Viewer Section -->
+    <div class="card">
+      <div class="card-title">
+        <span>📅 Class Schedule Viewer</span>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+        Upload your official class schedule image for quick reference:
+      </p>
+      <div class="upload-area" onclick="document.getElementById('schedFileInput').click()">
+        <p style="font-size: 0.9rem; color: #fca311; font-weight: 600;">📷 Click here to Upload Class Schedule Image</p>
+        <input type="file" id="schedFileInput" accept="image/*" style="display: none;" onchange="handleScheduleUpload(event)">
+      </div>
+      <div style="text-align: center;">
+        <img id="schedPreview" class="schedule-img-preview" alt="Uploaded Class Schedule">
+        <p id="noSchedText" style="font-size: 0.85rem; color: var(--text-secondary); padding: 1rem 0;">
+          No class schedule uploaded yet. Click above to upload.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid-layout">
+      <!-- Daily Attendance Form Section -->
+      <div class="card">
+        <div class="card-title">Daily Attendance Form</div>
+        
+        <div class="type-selector">
+          <div class="type-btn active-in" id="btnTypeIn" onclick="setAttendanceType('SIGN_IN')">🟢 Sign In</div>
+          <div class="type-btn" id="btnTypeOut" onclick="setAttendanceType('SIGN_OUT')">🔴 Sign Out</div>
+        </div>
+
+        <form id="attendanceForm" onsubmit="handleAttendanceSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>Automatic Timestamp</label>
+              <input type="text" id="autoTimestamp" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="email" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>Student ID</label>
+              <input type="text" id="studentId" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" id="firstName" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>Middle Initial</label>
+              <input type="text" id="middleInitial" class="form-control" maxlength="5">
+            </div>
+
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" id="lastName" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="subjectCode">Subject Code</label>
+              <input type="text" id="subjectCode" class="form-control" placeholder="e.g. CC 101 / IS 101" list="subjectList" required>
+              <datalist id="subjectList">
+                <option value="CC 101"><option value="CC 102A"><option value="IS 101"><option value="IS 102"><option value="GE 11"><option value="PE 1A"><option value="NSTP 1A"><option value="GE 4"><option value="GE 3">
+              </datalist>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="roomNumber">Room</label>
+              <input type="text" id="roomNumber" class="form-control" placeholder="e.g. 308 / COMPLAB111" required>
+            </div>
+
+            <!-- Privacy Setting Toggle Switch -->
+            <div class="form-group full-width">
+              <div class="privacy-box">
+                <label for="privacyToggle">Show record in Faculty Public Record (Privacy Mode)</label>
+                <label class="switch">
+                  <input type="checkbox" id="privacyToggle" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submitBtn">Submit Attendance Entry</button>
+        </form>
+      </div>
+
+      <!-- Attendance Calendar Tracker Section -->
+      <div class="card">
+        <div class="card-title">Attendance Calendar Tracker</div>
+        <div class="calendar-header">
+          <h4 style="font-size: 1rem; color: #fff;">Current Month Tracker</h4>
+          <span style="font-size: 0.75rem; color: var(--text-secondary);">Real-time Status</span>
+        </div>
+
+        <div class="calendar-grid" id="calendarDaysGrid"></div>
+
+        <div class="legend-container">
+          <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div> Present</div>
+          <div class="legend-item"><div class="legend-dot" style="background: #eab308;"></div> Late</div>
+          <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div> Absent</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let selectedType = 'SIGN_IN';
+    let currentUser = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateLiveTimestamp();
+      setInterval(updateLiveTimestamp, 1000);
+
+      const savedUser = localStorage.getItem('tcu_student_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+      } else {
+        currentUser = {
+          name: "Adrianne Rey Cadangan",
+          id: "2026-100234",
+          email: "adrianne@tcu.edu.ph",
+          department: "BS Information Systems"
+        };
+      }
+
+      document.getElementById('student-name-heading').textContent = `Welcome back, ${currentUser.name}!`;
+      document.getElementById('student-info-sub').textContent = `Student ID: ${currentUser.id} | Email: ${currentUser.email}`;
+      document.getElementById('student-course-badge').textContent = currentUser.department || 'BS Information Systems';
+      
+      document.getElementById('email').value = currentUser.email || '';
+      document.getElementById('studentId').value = currentUser.id || '';
+      
+      const nameParts = currentUser.name.split(' ');
+      if (nameParts.length >= 2) {
+        document.getElementById('firstName').value = nameParts[0];
+        document.getElementById('lastName').value = nameParts[nameParts.length - 1];
+      } else {
+        document.getElementById('firstName').value = currentUser.name;
+      }
+
+      loadSavedScheduleImage();
+      checkDailySubmissionStatus();
+      renderCalendar();
+    });
+
+    function updateLiveTimestamp() {
+      const now = new Date();
+      document.getElementById('autoTimestamp').value = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+    }
+
+    function setAttendanceType(type) {
+      selectedType = type;
+      const btnIn = document.getElementById('btnTypeIn');
+      const btnOut = document.getElementById('btnTypeOut');
+
+      if (type === 'SIGN_IN') {
+        btnIn.className = 'type-btn active-in';
+        btnOut.className = 'type-btn';
+      } else {
+        btnOut.className = 'type-btn active-out';
+        btnIn.className = 'type-btn';
+      }
+      checkDailySubmissionStatus();
+    }
+
+    function checkDailySubmissionStatus() {
+      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+      const todayStr = new Date().toLocaleDateString();
+      const studentId = currentUser.id;
+
+      const alreadySubmitted = records.find(r => r.studentId === studentId && r.date === todayStr && r.type === selectedType);
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (alreadySubmitted) {
+        submitBtn.disabled = true;
+        submitBtn.style.background = '#475569';
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.textContent = `Already Submitted for ${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'} Today`;
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.style.background = '#fca311';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.textContent = `Submit Attendance (${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'})`;
+      }
+    }
+
+    function handleScheduleUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const imgData = event.target.result;
+          const preview = document.getElementById('schedPreview');
+          const noText = document.getElementById('noSchedText');
+
+          preview.src = imgData;
+          preview.style.display = 'block';
+          if (noText) noText.style.display = 'none';
+
+          localStorage.setItem('tcu_student_sched_img', imgData);
+          alert('Class schedule image uploaded successfully!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function loadSavedScheduleImage() {
+      const savedImg = localStorage.getItem('tcu_student_sched_img');
+      const preview = document.getElementById('schedPreview');
+      const noText = document.getElementById('noSchedText');
+
+      if (savedImg) {
+        preview.src = savedImg;
+        preview.style.display = 'block';
+        if (noText) noText.style.display = 'none';
+      }
+    }
+
+    function handleAttendanceSubmit(e) {
+      e.preventDefault();
+      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+      const now = new Date();
+      const todayStr = now.toLocaleDateString();
+      const studentId = currentUser.id;
+
+      const alreadySubmitted = records.find(r => r.studentId === studentId && r.date === todayStr && r.type === selectedType);
+      if (alreadySubmitted) {
+        alert(`Multiple submissions restricted! You have already submitted your ${selectedType} today.`);
+        return;
+      }
+
+      const timestamp = document.getElementById('autoTimestamp').value;
+      const email = document.getElementById('email').value.trim();
+      const firstName = document.getElementById('firstName').value.trim();
+      const middleInitial = document.getElementById('middleInitial').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const subjectCode = document.getElementById('subjectCode').value.trim();
+      const room = document.getElementById('roomNumber').value.trim();
+      const isPublic = document.getElementById('privacyToggle').checked; // Privacy check
+      const fullName = `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`;
+
+      let status = 'PRESENT';
+      if (selectedType === 'SIGN_IN' && (now.getHours() > 8 || (now.getHours() === 8 && now.getMinutes() > 15))) {
+        status = 'LATE';
+      } else if (selectedType === 'SIGN_OUT') {
+        status = 'SIGNED_OUT';
+      }
+
+      const attendanceRecord = {
+        timestamp,
+        date: todayStr,
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        email,
+        studentId,
+        firstName,
+        middleInitial,
+        lastName,
+        fullName,
+        subjectCode,
+        room,
+        type: selectedType,
+        status,
+        isPublic // Save privacy setting
+      };
+
+      records.unshift(attendanceRecord);
+      localStorage.setItem('tcu_attendance_records', JSON.stringify(records));
+
+      alert(`Attendance ${selectedType} Submitted Successfully!`);
+      checkDailySubmissionStatus();
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarDaysGrid');
+      grid.innerHTML = '';
+
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      daysOfWeek.forEach(d => {
+        const div = document.createElement('div');
+        div.className = 'cal-day-name';
+        div.textContent = d;
+        grid.appendChild(div);
+      });
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const todayDate = now.getDate();
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+      const studentId = currentUser.id;
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const blank = document.createElement('div');
+        grid.appendChild(blank);
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const dateCell = document.createElement('div');
+        dateCell.className = 'cal-date';
+        if (day === todayDate) dateCell.classList.add('today');
+
+        const cellDateObj = new Date(year, month, day);
+        const cellDateStr = cellDateObj.toLocaleDateString();
+
+        const matchRecord = records.find(r => r.studentId === studentId && r.date === cellDateStr && r.type === 'SIGN_IN');
+
+        if (matchRecord) {
+          if (matchRecord.status === 'PRESENT') dateCell.classList.add('present');
+          else if (matchRecord.status === 'LATE') dateCell.classList.add('late');
+        } else if (cellDateObj < now && day !== todayDate) {
+          dateCell.classList.add('absent');
+        }
+
+        dateCell.innerHTML = `<span>${day}</span>`;
+        grid.appendChild(dateCell);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('tcu_student_user');
+      window.location.href = 'register.html';
+    }
+  </script>
+</body>
+</html>
