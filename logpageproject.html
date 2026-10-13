@@ -53,12 +53,13 @@
 
   <header>
     <nav>
-      <a href="landingpageproject.html" class="logo-container">
+      <!-- Naayos: Nakaturo na sa index.html -->
+      <a href="index.html" class="logo-container">
         <img src="TCU_logo_2024.png" alt="TCU Logo">
         <span>TCU Attendance</span>
       </a>
       <ul class="nav-links">
-        <li><a href="landingpageproject.html">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="registerpageproject.html">Register</a></li>
       </ul>
     </nav>
@@ -133,7 +134,6 @@
       const inputPass = document.getElementById('loginPass').value;
 
       if (loginRole === 'student') {
-        // Kunin ang mga nakarehistrong estudyante mula sa localStorage
         const students = JSON.parse(localStorage.getItem('tcu_registered_students')) || [];
         const foundStudent = students.find(s => (s.id === inputId || s.email === inputId) && s.pass === inputPass);
 
@@ -145,7 +145,6 @@
           alert('Access Denied: Student account not found or incorrect password. Please register first.');
         }
       } else {
-        // Kunin ang mga nakarehistrong faculty mula sa localStorage
         const facultyList = JSON.parse(localStorage.getItem('tcu_registered_faculty')) || [];
         const foundFaculty = facultyList.find(f => (f.id === inputId || f.email === inputId) && f.pass === inputPass);
 
