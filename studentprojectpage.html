@@ -88,12 +88,12 @@
 
   <header>
     <nav>
-      <a href="landingpageproject.html" class="logo-container">
+      <a href="index.html" class="logo-container">
         <img src="TCU_logo_2024.png" alt="TCU Logo">
         <span>TCU Student Portal</span>
       </a>
       <ul class="nav-links">
-        <li><a href="landingpageproject.html">Home</a></li>
+        <li><a href="index.html">Home</a></li>
         <li><a href="registerpageproject.html">Register</a></li>
         <li><a href="logpageproject.html" class="btn-logout" onclick="logout()">Logout</a></li>
       </ul>
@@ -352,7 +352,7 @@
       const lastName = document.getElementById('lastName').value.trim();
       const subjectCode = document.getElementById('subjectCode').value.trim();
       const room = document.getElementById('roomNumber').value.trim();
-      const isPublic = document.getElementById('privacyToggle').checked; // Privacy check
+      const isPublic = document.getElementById('privacyToggle').checked;
       const fullName = `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`;
 
       let status = 'PRESENT';
@@ -376,7 +376,7 @@
         room,
         type: selectedType,
         status,
-        isPublic // Save privacy setting
+        isPublic
       };
 
       records.unshift(attendanceRecord);
@@ -439,7 +439,7 @@
 
     function logout() {
       localStorage.removeItem('tcu_student_user');
-      window.location.href = 'register.html';
+      window.location.href = 'registerpageproject.html'; // Naka-ayos na dito
     }
   </script>
 </body>
