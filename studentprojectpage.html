@@ -25,7 +25,7 @@
     .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
     .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover { color: #fca311; }
-    .btn-logout { background-color: #ed1c24; color: #fff !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; cursor: pointer; }
+    .btn-logout { background-color: #ed1c24; color: #fff !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; cursor: pointer; border: none; }
 
     .dashboard-container { max-width: 1100px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; flex: 1; }
 
@@ -108,7 +108,7 @@
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="registerpageproject.html">Register</a></li>
-        <li><a href="logpageproject.html" class="btn-logout" onclick="logout()">Logout</a></li>
+        <li><button class="btn-logout" onclick="logout()">Logout</button></li>
       </ul>
     </nav>
   </header>
@@ -133,8 +133,8 @@
       </div>
 
       <div class="profile-info">
-        <h3 id="profileFullName">Adrianne Rey Cadangan</h3>
-        <p id="profileMeta">BS Information Systems | Student ID: 2026-100234</p>
+        <h3 id="profileFullName">Loading Name...</h3>
+        <p id="profileMeta">BS Information Systems | Student ID: --</p>
         
         <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1;">About Me:</label>
         <textarea id="aboutMeInput" class="bio-textarea" placeholder="Tell something about yourself (e.g., interests, goals, skills)..."></textarea>
@@ -260,29 +260,30 @@
       updateLiveTimestamp();
       setInterval(updateLiveTimestamp, 1000);
 
+      // 1. Session verification check
       const savedUser = localStorage.getItem('tcu_student_user');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
       } else {
-        currentUser = {
-          name: "Adrianne Rey Cadangan",
-          id: "2026-100234",
-          email: "adrianne@tcu.edu.ph",
-          department: "BS Information Systems"
-        };
+        alert('No active student session found. Please login first.');
+        window.location.href = 'logpageproject.html';
+        return;
       }
 
+      // 2. Populate Header & Badges
       document.getElementById('student-name-heading').textContent = `Welcome back, ${currentUser.name}!`;
       document.getElementById('student-info-sub').textContent = `Student ID: ${currentUser.id} | Email: ${currentUser.email}`;
       document.getElementById('student-course-badge').textContent = currentUser.department || 'BS Information Systems';
       
+      // 3. Populate Profile Card details
       document.getElementById('profileFullName').textContent = currentUser.name;
       document.getElementById('profileMeta').textContent = `${currentUser.department || 'BS Information Systems'} | Student ID: ${currentUser.id}`;
 
+      // 4. Auto-fill Form Fields from Session Data
       document.getElementById('email').value = currentUser.email || '';
       document.getElementById('studentId').value = currentUser.id || '';
       
-      const nameParts = currentUser.name.split(' ');
+      const nameParts = currentUser.name.trim().split(' ');
       if (nameParts.length >= 2) {
         document.getElementById('firstName').value = nameParts[0];
         document.getElementById('lastName').value = nameParts[nameParts.length - 1];
@@ -308,7 +309,7 @@
         reader.onload = function(event) {
           const imgData = event.target.result;
           document.getElementById('profilePicture').src = imgData;
-          localStorage.setItem('tcu_student_profile_img', imgData);
+          localStorage.setItem('tcu_student_profile_img_' + currentUser.id, imgData);
           alert('Profile picture updated successfully!');
         };
         reader.readAsDataURL(file);
@@ -317,17 +318,17 @@
 
     function saveAboutMe() {
       const bioText = document.getElementById('aboutMeInput').value;
-      localStorage.setItem('tcu_student_about_me', bioText);
+      localStorage.setItem('tcu_student_about_me_' + currentUser.id, bioText);
       alert('About Me updated successfully!');
     }
 
     function loadProfileData() {
-      const savedImg = localStorage.getItem('tcu_student_profile_img');
+      const savedImg = localStorage.getItem('tcu_student_profile_img_' + currentUser.id);
       if (savedImg) {
         document.getElementById('profilePicture').src = savedImg;
       }
 
-      const savedBio = localStorage.getItem('tcu_student_about_me');
+      const savedBio = localStorage.getItem('tcu_student_about_me_' + currentUser.id);
       if (savedBio) {
         document.getElementById('aboutMeInput').value = savedBio;
       }
@@ -349,6 +350,7 @@
     }
 
     function checkDailySubmissionStatus() {
+      if (!currentUser) return;
       const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
       const todayStr = new Date().toLocaleDateString();
       const studentId = currentUser.id;
@@ -382,7 +384,7 @@
           preview.style.display = 'block';
           if (noText) noText.style.display = 'none';
 
-          localStorage.setItem('tcu_student_sched_img', imgData);
+          localStorage.setItem('tcu_student_sched_img_' + currentUser.id, imgData);
           alert('Class schedule image uploaded successfully!');
         };
         reader.readAsDataURL(file);
@@ -390,7 +392,8 @@
     }
 
     function loadSavedScheduleImage() {
-      const savedImg = localStorage.getItem('tcu_student_sched_img');
+      if (!currentUser) return;
+      const savedImg = localStorage.getItem('tcu_student_sched_img_' + currentUser.id);
       const preview = document.getElementById('schedPreview');
       const noText = document.getElementById('noSchedText');
 
@@ -508,7 +511,7 @@
 
     function logout() {
       localStorage.removeItem('tcu_student_user');
-      window.location.href = 'registerpageproject.html';
+      window.location.href = 'logpageproject.html';
     }
   </script>
 </body>
