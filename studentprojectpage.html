@@ -4,6 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Portal - Attendance & Privacy Settings</title>
+  
+  <!-- Firebase SDK Setup -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // PALITAN ITO NG MGA TUNAY MONG FIREBASE CONFIG DETAILS
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    window.db = db;
+    window.firebaseModules = { doc, setDoc, getDoc, collection, addDoc, getDocs, query, where };
+    
+    // Trigger event kapag handa na ang Firebase para ma-load ang data
+    window.dispatchEvent(new Event('firebase-ready'));
+  </script>
+
   <style>
     :root {
       --bg-color: #0d1117;
@@ -34,7 +60,6 @@
     .welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
     .student-badge { background: rgba(237, 28, 36, 0.2); color: var(--badge-text); border: 1px solid #ed1c24; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
-    /* Profile Section Styles */
     .profile-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
     .profile-img-container { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-color); background: #0d1117; flex-shrink: 0; }
     .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
@@ -256,30 +281,41 @@
     let selectedType = 'SIGN_IN';
     let currentUser = null;
 
+    window.addEventListener('firebase-ready', () => {
+      initApp();
+    });
+
+    // Fallback kung nauna mag-load ang DOM kaysa sa module
     window.addEventListener('DOMContentLoaded', () => {
       updateLiveTimestamp();
       setInterval(updateLiveTimestamp, 1000);
 
-      // 1. Session verification check
       const savedUser = localStorage.getItem('tcu_student_user');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
+        initUserData();
       } else {
         alert('No active student session found. Please login first.');
         window.location.href = 'logpageproject.html';
-        return;
       }
+    });
 
-      // 2. Populate Header & Badges
+    function initApp() {
+      if (currentUser && window.db) {
+        loadProfileFromFirebase();
+        checkDailySubmissionStatus();
+        renderCalendar();
+      }
+    }
+
+    function initUserData() {
       document.getElementById('student-name-heading').textContent = `Welcome back, ${currentUser.name}!`;
       document.getElementById('student-info-sub').textContent = `Student ID: ${currentUser.id} | Email: ${currentUser.email}`;
       document.getElementById('student-course-badge').textContent = currentUser.department || 'BS Information Systems';
       
-      // 3. Populate Profile Card details
       document.getElementById('profileFullName').textContent = currentUser.name;
       document.getElementById('profileMeta').textContent = `${currentUser.department || 'BS Information Systems'} | Student ID: ${currentUser.id}`;
 
-      // 4. Auto-fill Form Fields from Session Data
       document.getElementById('email').value = currentUser.email || '';
       document.getElementById('studentId').value = currentUser.id || '';
       
@@ -291,46 +327,107 @@
         document.getElementById('firstName').value = currentUser.name;
       }
 
-      loadProfileData();
-      loadSavedScheduleImage();
-      checkDailySubmissionStatus();
-      renderCalendar();
-    });
+      if (window.db) {
+        loadProfileFromFirebase();
+        checkDailySubmissionStatus();
+        renderCalendar();
+      }
+    }
 
     function updateLiveTimestamp() {
       const now = new Date();
       document.getElementById('autoTimestamp').value = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
     }
 
-    function handleProfilePictureUpload(e) {
+    // --- FIREBASE PROFILE & BIO FUNCTIONS ---
+    async function handleProfilePictureUpload(e) {
       const file = e.target.files[0];
-      if (file) {
+      if (file && currentUser) {
         const reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = async function(event) {
           const imgData = event.target.result;
           document.getElementById('profilePicture').src = imgData;
-          localStorage.setItem('tcu_student_profile_img_' + currentUser.id, imgData);
-          alert('Profile picture updated successfully!');
+          
+          try {
+            const { doc, setDoc } = window.firebaseModules;
+            await setDoc(doc(window.db, "students", currentUser.id), {
+              profileImg: imgData
+            }, { merge: true });
+            alert('Profile picture updated successfully in Firebase!');
+          } catch (err) {
+            console.error("Error uploading profile image:", err);
+          }
         };
         reader.readAsDataURL(file);
       }
     }
 
-    function saveAboutMe() {
+    async function saveAboutMe() {
       const bioText = document.getElementById('aboutMeInput').value;
-      localStorage.setItem('tcu_student_about_me_' + currentUser.id, bioText);
-      alert('About Me updated successfully!');
+      if (!currentUser) return;
+
+      try {
+        const { doc, setDoc } = window.firebaseModules;
+        await setDoc(doc(window.db, "students", currentUser.id), {
+          bio: bioText
+        }, { merge: true });
+        alert('About Me updated successfully in Firebase!');
+      } catch (err) {
+        console.error("Error saving bio:", err);
+        alert('Failed to save bio.');
+      }
     }
 
-    function loadProfileData() {
-      const savedImg = localStorage.getItem('tcu_student_profile_img_' + currentUser.id);
-      if (savedImg) {
-        document.getElementById('profilePicture').src = savedImg;
+    async function loadProfileFromFirebase() {
+      if (!currentUser || !window.db) return;
+      try {
+        const { doc, getDoc } = window.firebaseModules;
+        const docSnap = await getDoc(doc(window.db, "students", currentUser.id));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.profileImg) {
+            document.getElementById('profilePicture').src = data.profileImg;
+          }
+          if (data.bio) {
+            document.getElementById('aboutMeInput').value = data.bio;
+          }
+          if (data.scheduleImg) {
+            const preview = document.getElementById('schedPreview');
+            const noText = document.getElementById('noSchedText');
+            preview.src = data.scheduleImg;
+            preview.style.display = 'block';
+            if (noText) noText.style.display = 'none';
+          }
+        }
+      } catch (err) {
+        console.error("Error loading profile from Firebase:", err);
       }
+    }
 
-      const savedBio = localStorage.getItem('tcu_student_about_me_' + currentUser.id);
-      if (savedBio) {
-        document.getElementById('aboutMeInput').value = savedBio;
+    async function handleScheduleUpload(e) {
+      const file = e.target.files[0];
+      if (file && currentUser) {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+          const imgData = event.target.result;
+          const preview = document.getElementById('schedPreview');
+          const noText = document.getElementById('noSchedText');
+
+          preview.src = imgData;
+          preview.style.display = 'block';
+          if (noText) noText.style.display = 'none';
+
+          try {
+            const { doc, setDoc } = window.firebaseModules;
+            await setDoc(doc(window.db, "students", currentUser.id), {
+              scheduleImg: imgData
+            }, { merge: true });
+            alert('Class schedule uploaded successfully to Firebase!');
+          } catch (err) {
+            console.error("Error saving schedule image:", err);
+          }
+        };
+        reader.readAsDataURL(file);
       }
     }
 
@@ -349,117 +446,119 @@
       checkDailySubmissionStatus();
     }
 
-    function checkDailySubmissionStatus() {
-      if (!currentUser) return;
-      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+    async function checkDailySubmissionStatus() {
+      if (!currentUser || !window.db) return;
       const todayStr = new Date().toLocaleDateString();
       const studentId = currentUser.id;
 
-      const alreadySubmitted = records.find(r => r.studentId === studentId && r.date === todayStr && r.type === selectedType);
-      const submitBtn = document.getElementById('submitBtn');
+      try {
+        const { collection, getDocs, query, where } = window.firebaseModules;
+        const q = query(
+          collection(window.db, "attendance"),
+          where("studentId", "==", studentId),
+          where("date", "==", todayStr),
+          where("type", "==", selectedType)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const submitBtn = document.getElementById('submitBtn');
 
-      if (alreadySubmitted) {
-        submitBtn.disabled = true;
-        submitBtn.style.background = '#475569';
-        submitBtn.style.cursor = 'not-allowed';
-        submitBtn.textContent = `Already Submitted for ${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'} Today`;
-      } else {
-        submitBtn.disabled = false;
-        submitBtn.style.background = '#fca311';
-        submitBtn.style.cursor = 'pointer';
-        submitBtn.textContent = `Submit Attendance (${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'})`;
+        if (!querySnapshot.empty) {
+          submitBtn.disabled = true;
+          submitBtn.style.background = '#475569';
+          submitBtn.style.cursor = 'not-allowed';
+          submitBtn.textContent = `Already Submitted for ${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'} Today`;
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.style.background = '#fca311';
+          submitBtn.style.cursor = 'pointer';
+          submitBtn.textContent = `Submit Attendance (${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'})`;
+        }
+      } catch (err) {
+        console.error("Error checking submission status:", err);
       }
     }
 
-    function handleScheduleUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const imgData = event.target.result;
-          const preview = document.getElementById('schedPreview');
-          const noText = document.getElementById('noSchedText');
-
-          preview.src = imgData;
-          preview.style.display = 'block';
-          if (noText) noText.style.display = 'none';
-
-          localStorage.setItem('tcu_student_sched_img_' + currentUser.id, imgData);
-          alert('Class schedule image uploaded successfully!');
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function loadSavedScheduleImage() {
-      if (!currentUser) return;
-      const savedImg = localStorage.getItem('tcu_student_sched_img_' + currentUser.id);
-      const preview = document.getElementById('schedPreview');
-      const noText = document.getElementById('noSchedText');
-
-      if (savedImg) {
-        preview.src = savedImg;
-        preview.style.display = 'block';
-        if (noText) noText.style.display = 'none';
-      }
-    }
-
-    function handleAttendanceSubmit(e) {
+    // --- FIREBASE ATTENDANCE SUBMISSION ---
+    async function handleAttendanceSubmit(e) {
       e.preventDefault();
-      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+      if (!currentUser || !window.db) return;
+
       const now = new Date();
       const todayStr = now.toLocaleDateString();
       const studentId = currentUser.id;
+      const submitBtn = document.getElementById('submitBtn');
 
-      const alreadySubmitted = records.find(r => r.studentId === studentId && r.date === todayStr && r.type === selectedType);
-      if (alreadySubmitted) {
-        alert(`Multiple submissions restricted! You have already submitted your ${selectedType} today.`);
-        return;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting to Cloud...";
+
+      try {
+        const { collection, addDoc, getDocs, query, where } = window.firebaseModules;
+        
+        // Double-check kung na-submit na
+        const q = query(
+          collection(window.db, "attendance"),
+          where("studentId", "==", studentId),
+          where("date", "==", todayStr),
+          where("type", "==", selectedType)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          alert(`Multiple submissions restricted! You have already submitted your ${selectedType} today.`);
+          checkDailySubmissionStatus();
+          return;
+        }
+
+        const timestamp = document.getElementById('autoTimestamp').value;
+        const email = document.getElementById('email').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const middleInitial = document.getElementById('middleInitial').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const subjectCode = document.getElementById('subjectCode').value.trim();
+        const room = document.getElementById('roomNumber').value.trim();
+        const isPublic = document.getElementById('privacyToggle').checked;
+        const fullName = `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`;
+
+        let status = 'PRESENT';
+        if (selectedType === 'SIGN_IN' && (now.getHours() > 8 || (now.getHours() === 8 && now.getMinutes() > 15))) {
+          status = 'LATE';
+        } else if (selectedType === 'SIGN_OUT') {
+          status = 'SIGNED_OUT';
+        }
+
+        const attendanceRecord = {
+          timestamp,
+          date: todayStr,
+          time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          email,
+          studentId,
+          firstName,
+          middleInitial,
+          lastName,
+          fullName,
+          subjectCode,
+          room,
+          type: selectedType,
+          status,
+          isPublic,
+          createdAt: new Date()
+        };
+
+        // Diretsong isinusulat sa Firestore collection na binabasa rin ng Faculty Dashboard
+        await addDoc(collection(window.db, "attendance"), attendanceRecord);
+
+        alert(`Attendance ${selectedType} Submitted Successfully to Firebase!`);
+        checkDailySubmissionStatus();
+        renderCalendar();
+      } catch (err) {
+        console.error("Error submitting attendance:", err);
+        alert("Error recording attendance. Please try again.");
+        submitBtn.disabled = false;
       }
-
-      const timestamp = document.getElementById('autoTimestamp').value;
-      const email = document.getElementById('email').value.trim();
-      const firstName = document.getElementById('firstName').value.trim();
-      const middleInitial = document.getElementById('middleInitial').value.trim();
-      const lastName = document.getElementById('lastName').value.trim();
-      const subjectCode = document.getElementById('subjectCode').value.trim();
-      const room = document.getElementById('roomNumber').value.trim();
-      const isPublic = document.getElementById('privacyToggle').checked;
-      const fullName = `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`;
-
-      let status = 'PRESENT';
-      if (selectedType === 'SIGN_IN' && (now.getHours() > 8 || (now.getHours() === 8 && now.getMinutes() > 15))) {
-        status = 'LATE';
-      } else if (selectedType === 'SIGN_OUT') {
-        status = 'SIGNED_OUT';
-      }
-
-      const attendanceRecord = {
-        timestamp,
-        date: todayStr,
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        email,
-        studentId,
-        firstName,
-        middleInitial,
-        lastName,
-        fullName,
-        subjectCode,
-        room,
-        type: selectedType,
-        status,
-        isPublic
-      };
-
-      records.unshift(attendanceRecord);
-      localStorage.setItem('tcu_attendance_records', JSON.stringify(records));
-
-      alert(`Attendance ${selectedType} Submitted Successfully!`);
-      checkDailySubmissionStatus();
-      renderCalendar();
     }
 
-    function renderCalendar() {
+    async function renderCalendar() {
       const grid = document.getElementById('calendarDaysGrid');
       grid.innerHTML = '';
 
@@ -479,12 +578,26 @@
       const firstDayIndex = new Date(year, month, 1).getDay();
       const totalDays = new Date(year, month + 1, 0).getDate();
 
-      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
-      const studentId = currentUser.id;
-
       for (let i = 0; i < firstDayIndex; i++) {
         const blank = document.createElement('div');
         grid.appendChild(blank);
+      }
+
+      let records = [];
+      if (window.db && currentUser) {
+        try {
+          const { collection, getDocs, query, where } = window.firebaseModules;
+          const q = query(
+            collection(window.db, "attendance"),
+            where("studentId", "==", currentUser.id)
+          );
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach(doc => {
+            records.push(doc.data());
+          });
+        } catch (err) {
+          console.error("Error fetching attendance history for calendar:", err);
+        }
       }
 
       for (let day = 1; day <= totalDays; day++) {
@@ -495,7 +608,7 @@
         const cellDateObj = new Date(year, month, day);
         const cellDateStr = cellDateObj.toLocaleDateString();
 
-        const matchRecord = records.find(r => r.studentId === studentId && r.date === cellDateStr && r.type === 'SIGN_IN');
+        const matchRecord = records.find(r => r.date === cellDateStr && r.type === 'SIGN_IN');
 
         if (matchRecord) {
           if (matchRecord.status === 'PRESENT') dateCell.classList.add('present');
