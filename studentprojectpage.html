@@ -142,7 +142,7 @@
         <h1 id="student-name-heading">Welcome back, Student!</h1>
         <p id="student-info-sub">Student ID: Loading... | Email: Loading...</p>
       </div>
-      <span class="student-badge" id="student-course-badge">BS Information Systems</span>
+      <span class="student-badge" id="student-course-badge">CICT - Information Systems</span>
     </div>
 
     <!-- STUDENT PROFILE SECTION -->
@@ -157,7 +157,7 @@
 
       <div class="profile-info">
         <h3 id="profileFullName">Loading Name...</h3>
-        <p id="profileMeta">BS Information Systems | Student ID: --</p>
+        <p id="profileMeta">CICT - Information Systems | Student ID: --</p>
         
         <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1;">About Me:</label>
         <textarea id="aboutMeInput" class="bio-textarea" placeholder="Tell something about yourself (e.g., interests, goals, skills)..."></textarea>
@@ -200,6 +200,26 @@
             <div class="form-group full-width">
               <label>Automatic Timestamp</label>
               <input type="text" id="autoTimestamp" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+              <label>Department</label>
+              <select id="departmentSelect" class="form-control" onchange="updateCourseOptions()" required>
+                <option value="">Select Department</option>
+                <option value="CICT">CICT</option>
+                <option value="CCJ">CCJ</option>
+                <option value="CHTM">CHTM</option>
+                <option value="CILT">CILT</option>
+                <option value="CBM">CBM</option>
+                <option value="CAS">CAS</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Course / Program</label>
+              <select id="courseSelect" class="form-control" required>
+                <option value="">Select Course</option>
+              </select>
             </div>
 
             <div class="form-group">
@@ -278,6 +298,34 @@
     let selectedType = 'SIGN_IN';
     let currentUser = null;
 
+    // Structured Departments and Courses List
+    const departmentCourses = {
+      "CICT": ["Information Systems", "Computer Science"],
+      "CCJ": ["Criminology"],
+      "CHTM": ["Hospitality & Tourism Management"],
+      "CILT": ["Elementary Education", "Secondary Education"],
+      "CBM": ["Business Administration", "Entrepreneurship / Entrepreneurial Management", "Office Administration / Office Management"],
+      "CAS": ["Psychology", "Public Administration"]
+    };
+
+    function updateCourseOptions(selectedCourse = "") {
+      const deptSelect = document.getElementById('departmentSelect');
+      const courseSelect = document.getElementById('courseSelect');
+      const chosenDept = deptSelect.value;
+
+      courseSelect.innerHTML = '<option value="">Select Course</option>';
+
+      if (chosenDept && departmentCourses[chosenDept]) {
+        departmentCourses[chosenDept].forEach(course => {
+          const opt = document.createElement('option');
+          opt.value = course;
+          opt.textContent = course;
+          if (course === selectedCourse) opt.selected = true;
+          courseSelect.appendChild(opt);
+        });
+      }
+    }
+
     window.addEventListener('firebase-ready', () => {
       initApp();
     });
@@ -307,17 +355,22 @@
     function initUserData() {
       const studentName = currentUser.fullName || currentUser.name || "Student";
       const studentIdNum = currentUser.idNumber || currentUser.id || "";
-      const studentDept = currentUser.department || "BS Information Systems";
+      const studentDept = currentUser.department || "CICT";
+      const studentCourse = currentUser.course || "Information Systems";
 
       document.getElementById('student-name-heading').textContent = `Welcome back, ${studentName}!`;
       document.getElementById('student-info-sub').textContent = `Student ID: ${studentIdNum} | Email: ${currentUser.email}`;
-      document.getElementById('student-course-badge').textContent = studentDept;
+      document.getElementById('student-course-badge').textContent = `${studentDept} - ${studentCourse}`;
       
       document.getElementById('profileFullName').textContent = studentName;
-      document.getElementById('profileMeta').textContent = `${studentDept} | Student ID: ${studentIdNum}`;
+      document.getElementById('profileMeta').textContent = `${studentDept} - ${studentCourse} | Student ID: ${studentIdNum}`;
 
       document.getElementById('email').value = currentUser.email || '';
       document.getElementById('studentId').value = studentIdNum;
+
+      // Auto-select department & course in form
+      document.getElementById('departmentSelect').value = studentDept;
+      updateCourseOptions(studentCourse);
       
       const nameParts = studentName.trim().split(' ');
       if (nameParts.length >= 2) {
@@ -512,6 +565,8 @@
         }
 
         const timestamp = document.getElementById('autoTimestamp').value;
+        const department = document.getElementById('departmentSelect').value;
+        const course = document.getElementById('courseSelect').value;
         const email = document.getElementById('email').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const middleInitial = document.getElementById('middleInitial').value.trim();
@@ -521,11 +576,12 @@
         const isPublic = document.getElementById('privacyToggle').checked;
         const fullName = `${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}`;
 
-        // WALANG STATUS FIELD: type at date lang ang sapat na!
         const attendanceRecord = {
           timestamp,
           date: todayStr,
           time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          department,
+          course,
           email,
           studentId: studentIdNum,
           firstName,
