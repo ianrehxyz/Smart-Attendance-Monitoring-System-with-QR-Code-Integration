@@ -103,7 +103,6 @@
           </select>
         </div>
 
-        <!-- Security Key Field (Lilitaw lamang kapag Faculty ang pinili) -->
         <div class="form-group" id="facultyCodeGroup" style="display: none;">
           <label style="color: #38bdf8;">Faculty Access Code / Authorization Key</label>
           <input type="password" id="regFacultyCode" class="form-control" placeholder="Enter authorized security key">
@@ -193,7 +192,6 @@
         alert('Student account registered successfully! Please proceed to login.');
         window.location.href = 'logpageproject.html';
       } else {
-        // --- FACULTY SECURITY CODE VERIFICATION ---
         const enteredCode = document.getElementById('regFacultyCode').value.trim();
         
         const validFacultySecrets = [
