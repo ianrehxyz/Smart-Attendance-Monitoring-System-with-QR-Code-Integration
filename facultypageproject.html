@@ -97,7 +97,7 @@
       <ul class="nav-links">
         <li><a href="landingpageproject.html">Home</a></li>
         <li><a href="registerpageproject.html">Register</a></li>
-        <li><a href="logpageproject.html" class="btn-logout" onclick="logout()">Logout</a></li>
+        <li><a href="#" class="btn-logout" onclick="logout()">Logout</a></li>
       </ul>
     </nav>
   </header>
@@ -124,8 +124,8 @@
       </div>
 
       <div class="profile-info">
-        <h3 id="profileFacultyName">Prof. Adrianne Rey Cadangan</h3>
-        <p id="profileFacultyMeta">College of Information Systems | Faculty ID: FAC-2026-0891</p>
+        <h3 id="profileFacultyName">Prof. Faculty Name</h3>
+        <p id="profileFacultyMeta">Department | Faculty ID</p>
         
         <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1;">Faculty Bio / Consultation Hours:</label>
         <textarea id="facultyBioInput" class="bio-textarea" placeholder="Enter consultation schedule, office room, or bio..."></textarea>
@@ -251,14 +251,13 @@
       if (savedUser) {
         currentFaculty = JSON.parse(savedUser);
       } else {
-        currentFaculty = {
-          name: "Adrianne Rey Cadangan",
-          id: "FAC-2026-0891",
-          email: "adrianne@tcu.edu.ph",
-          department: "College of Information Systems"
-        };
+        // Kapag walang narehistro, ibalik sa registration page
+        alert('No registered faculty session found. Please register first.');
+        window.location.href = 'registerpageproject.html';
+        return;
       }
 
+      // I-load ang dynamic data galing sa nirehistrong account
       document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. ${currentFaculty.name}!`;
       document.getElementById('faculty-info-sub').textContent = `Faculty ID: ${currentFaculty.id} | Email: ${currentFaculty.email}`;
       document.getElementById('faculty-dept-badge').textContent = currentFaculty.department;
@@ -392,7 +391,7 @@
 
       // Filter records and strictly honor student privacy setting (isPublic !== false)
       const filteredRecords = records.filter(rec => {
-        if (rec.isPublic === false) return false; // Skip private records
+        if (rec.isPublic === false) return false;
 
         const matchDept = (deptFilter === 'ALL') || (rec.department === deptFilter || deptFilter === 'College of Information Systems');
         const subjectOrSection = (rec.subjectCode || '').toLowerCase();
@@ -437,6 +436,7 @@
 
     function logout() {
       localStorage.removeItem('tcu_faculty_user');
+      alert('Logged out successfully.');
       window.location.href = 'registerpageproject.html';
     }
   </script>
