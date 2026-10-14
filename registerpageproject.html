@@ -55,7 +55,6 @@
 
   <header>
     <nav>
-      <!-- Naayos na: Nakaturo na sa index.html -->
       <a href="index.html" class="logo-container">
         <img src="TCU_logo_2024.png" alt="TCU Logo">
         <span>TCU Attendance</span>
@@ -106,6 +105,13 @@
           </select>
         </div>
 
+        <!-- Security Key Field (Lilitaw lamang kapag Faculty ang pinili) -->
+        <div class="form-group" id="facultyCodeGroup" style="display: none;">
+          <label style="color: #38bdf8;">Faculty Access Code / Authorization Key</label>
+          <input type="password" id="regFacultyCode" class="form-control" placeholder="Enter authorized security key">
+          <small style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.25rem;">Required for faculty verification.</small>
+        </div>
+
         <div class="form-group">
           <label>Password</label>
           <input type="password" id="regPass" class="form-control" placeholder="••••••••" required>
@@ -132,6 +138,8 @@
       const idLbl = document.getElementById('idLabel');
       const deptLbl = document.getElementById('deptLabel');
       const subBtn = document.getElementById('regSubmitBtn');
+      const facultyCodeGroup = document.getElementById('facultyCodeGroup');
+      const facultyCodeInput = document.getElementById('regFacultyCode');
 
       if (role === 'student') {
         btnStu.className = 'role-btn active-student';
@@ -143,6 +151,9 @@
         subBtn.textContent = 'Register Student Account';
         subBtn.style.background = '#fca311';
         subBtn.style.color = '#0d1117';
+        
+        facultyCodeGroup.style.display = 'none';
+        facultyCodeInput.removeAttribute('required');
       } else {
         btnFac.className = 'role-btn active-faculty';
         btnStu.className = 'role-btn';
@@ -153,6 +164,9 @@
         subBtn.textContent = 'Register Faculty Account';
         subBtn.style.background = '#1a4da6';
         subBtn.style.color = '#fff';
+        
+        facultyCodeGroup.style.display = 'flex';
+        facultyCodeInput.setAttribute('required', 'true');
       }
     }
 
@@ -181,6 +195,23 @@
         alert('Student account registered successfully! Please proceed to login.');
         window.location.href = 'logpageproject.html';
       } else {
+        // --- FACULTY SECURITY CODE VERIFICATION ---
+        const enteredCode = document.getElementById('regFacultyCode').value.trim();
+        
+        // Listahan ng mga awtorisadong security codes para sa faculty
+        const validFacultySecrets = [
+          "TCU-FACULTY-2026",
+          "TCU-FACULTY-2027",
+          "TCU-FACULTY-2028",
+          "TCU-FACULTY-2029",
+          "TCU-FACULTY-2030"
+        ];
+
+        if (!validFacultySecrets.includes(enteredCode)) {
+          alert('Access Denied: Invalid Faculty Authorization Code! Only authorized professors can register.');
+          return;
+        }
+
         let facultyList = JSON.parse(localStorage.getItem('tcu_registered_faculty')) || [];
         
         const existing = facultyList.find(f => f.id === id || f.email === email);
