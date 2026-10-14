@@ -34,6 +34,20 @@
     .welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
     .faculty-badge { background: rgba(26, 77, 166, 0.2); color: var(--badge-text); border: 1px solid var(--accent-color); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
+    /* Faculty Profile Card Styles */
+    .profile-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+    .profile-img-container { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-color); background: #0d1117; flex-shrink: 0; }
+    .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-upload-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); text-align: center; padding: 4px 0; cursor: pointer; font-size: 0.75rem; color: #38bdf8; font-weight: 600; }
+    .profile-info { flex: 1; min-width: 250px; }
+    .profile-info h3 { font-size: 1.25rem; color: #fff; margin-bottom: 0.25rem; }
+    .profile-info p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .bio-textarea { width: 100%; background: #0d1117; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; padding: 0.5rem; font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; margin-top: 0.5rem; }
+    .bio-textarea:focus { border-color: #38bdf8; }
+    .btn-save-bio { background: #38bdf8; color: #0d1117; border: none; padding: 0.35rem 0.85rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-top: 0.4rem; }
+    .btn-save-bio:hover { background: #0ea5e9; }
+    @media (max-width: 900px) { .profile-card { flex-direction: column; text-align: center; justify-content: center; } }
+
     .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 
@@ -41,6 +55,7 @@
     .form-group { display: flex; flex-direction: column; }
     .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
     .form-control { width: 100%; padding: 0.65rem; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
+    .form-control:focus { border-color: #38bdf8; }
 
     .btn-action { background: #1a4da6; color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn-action:hover { background: #143b85; }
@@ -95,6 +110,26 @@
       </div>
       <div>
         <span class="faculty-badge" id="faculty-dept-badge">College of Information Systems</span>
+      </div>
+    </div>
+
+    <!-- FACULTY PROFILE SECTION -->
+    <div class="profile-card">
+      <div class="profile-img-container">
+        <img id="facultyProfilePicture" src="https://via.placeholder.com/150?text=Faculty" alt="Faculty Profile Picture">
+        <div class="profile-upload-overlay" onclick="document.getElementById('facultyImgInput').click()">
+          📷 Upload
+        </div>
+        <input type="file" id="facultyImgInput" accept="image/*" style="display: none;" onchange="handleFacultyProfileUpload(event)">
+      </div>
+
+      <div class="profile-info">
+        <h3 id="profileFacultyName">Prof. Adrianne Rey Cadangan</h3>
+        <p id="profileFacultyMeta">College of Information Systems | Faculty ID: FAC-2026-0891</p>
+        
+        <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1;">Faculty Bio / Consultation Hours:</label>
+        <textarea id="facultyBioInput" class="bio-textarea" placeholder="Enter consultation schedule, office room, or bio..."></textarea>
+        <button class="btn-save-bio" onclick="saveFacultyBio()">Save Bio</button>
       </div>
     </div>
 
@@ -208,24 +243,66 @@
     ];
 
     let selectedClassIndex = null;
+    let currentFaculty = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('tcu_faculty_user');
       
       if (savedUser) {
-        const user = JSON.parse(savedUser);
-        document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. ${user.name}!`;
-        document.getElementById('faculty-info-sub').textContent = `Faculty ID: ${user.id} | Email: ${user.email}`;
-        document.getElementById('faculty-dept-badge').textContent = user.department;
+        currentFaculty = JSON.parse(savedUser);
       } else {
-        document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. Adrianne Rey Cadangan!`;
-        document.getElementById('faculty-info-sub').textContent = `Faculty ID: FAC-2026-0891 | Email: adrianne@tcu.edu.ph`;
-        document.getElementById('faculty-dept-badge').textContent = `College of Information Systems`;
+        currentFaculty = {
+          name: "Adrianne Rey Cadangan",
+          id: "FAC-2026-0891",
+          email: "adrianne@tcu.edu.ph",
+          department: "College of Information Systems"
+        };
       }
 
+      document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. ${currentFaculty.name}!`;
+      document.getElementById('faculty-info-sub').textContent = `Faculty ID: ${currentFaculty.id} | Email: ${currentFaculty.email}`;
+      document.getElementById('faculty-dept-badge').textContent = currentFaculty.department;
+
+      document.getElementById('profileFacultyName').textContent = `Prof. ${currentFaculty.name}`;
+      document.getElementById('profileFacultyMeta').textContent = `${currentFaculty.department} | Faculty ID: ${currentFaculty.id}`;
+
+      loadFacultyProfileData();
       renderAssignedClasses();
       loadAttendanceRecords();
     });
+
+    /* FACULTY PROFILE FUNCTIONS */
+    function handleFacultyProfileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const imgData = event.target.result;
+          document.getElementById('facultyProfilePicture').src = imgData;
+          localStorage.setItem('tcu_faculty_profile_img', imgData);
+          alert('Faculty profile picture updated successfully!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveFacultyBio() {
+      const bioText = document.getElementById('facultyBioInput').value;
+      localStorage.setItem('tcu_faculty_bio', bioText);
+      alert('Faculty Bio / Consultation hours saved successfully!');
+    }
+
+    function loadFacultyProfileData() {
+      const savedImg = localStorage.getItem('tcu_faculty_profile_img');
+      if (savedImg) {
+        document.getElementById('facultyProfilePicture').src = savedImg;
+      }
+
+      const savedBio = localStorage.getItem('tcu_faculty_bio');
+      if (savedBio) {
+        document.getElementById('facultyBioInput').value = savedBio;
+      }
+    }
 
     function getStoredClasses() {
       const stored = localStorage.getItem('tcu_faculty_classes');
