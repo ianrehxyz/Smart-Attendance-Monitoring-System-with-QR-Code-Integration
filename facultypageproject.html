@@ -251,13 +251,11 @@
       if (savedUser) {
         currentFaculty = JSON.parse(savedUser);
       } else {
-        // Kapag walang narehistro, ibalik sa registration page
         alert('No registered faculty session found. Please register first.');
         window.location.href = 'registerpageproject.html';
         return;
       }
 
-      // I-load ang dynamic data galing sa nirehistrong account
       document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. ${currentFaculty.name}!`;
       document.getElementById('faculty-info-sub').textContent = `Faculty ID: ${currentFaculty.id} | Email: ${currentFaculty.email}`;
       document.getElementById('faculty-dept-badge').textContent = currentFaculty.department;
@@ -273,12 +271,12 @@
     /* FACULTY PROFILE FUNCTIONS */
     function handleFacultyProfileUpload(e) {
       const file = e.target.files[0];
-      if (file) {
+      if (file && currentFaculty) {
         const reader = new FileReader();
         reader.onload = function(event) {
           const imgData = event.target.result;
           document.getElementById('facultyProfilePicture').src = imgData;
-          localStorage.setItem('tcu_faculty_profile_img', imgData);
+          localStorage.setItem(`tcu_faculty_profile_img_${currentFaculty.id}`, imgData);
           alert('Faculty profile picture updated successfully!');
         };
         reader.readAsDataURL(file);
@@ -286,18 +284,20 @@
     }
 
     function saveFacultyBio() {
+      if (!currentFaculty) return;
       const bioText = document.getElementById('facultyBioInput').value;
-      localStorage.setItem('tcu_faculty_bio', bioText);
+      localStorage.setItem(`tcu_faculty_bio_${currentFaculty.id}`, bioText);
       alert('Faculty Bio / Consultation hours saved successfully!');
     }
 
     function loadFacultyProfileData() {
-      const savedImg = localStorage.getItem('tcu_faculty_profile_img');
+      if (!currentFaculty) return;
+      const savedImg = localStorage.getItem(`tcu_faculty_profile_img_${currentFaculty.id}`);
       if (savedImg) {
         document.getElementById('facultyProfilePicture').src = savedImg;
       }
 
-      const savedBio = localStorage.getItem('tcu_faculty_bio');
+      const savedBio = localStorage.getItem(`tcu_faculty_bio_${currentFaculty.id}`);
       if (savedBio) {
         document.getElementById('facultyBioInput').value = savedBio;
       }
@@ -393,7 +393,7 @@
       const filteredRecords = records.filter(rec => {
         if (rec.isPublic === false) return false;
 
-        const matchDept = (deptFilter === 'ALL') || (rec.department === deptFilter || deptFilter === 'College of Information Systems');
+        const matchDept = (deptFilter === 'ALL') || (rec.department === deptFilter);
         const subjectOrSection = (rec.subjectCode || '').toLowerCase();
         const matchSection = !sectionFilter || subjectOrSection.includes(sectionFilter);
 
