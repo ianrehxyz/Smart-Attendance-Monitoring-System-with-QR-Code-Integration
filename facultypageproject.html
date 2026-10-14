@@ -3,442 +3,418 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Faculty Dashboard - Smart Attendance System</title>
-  <link rel="stylesheet" href="glass-theme.css">
+  <title>Faculty Dashboard - Smart Attendance Monitoring System</title>
   <style>
     :root {
-      --bg-color: #0d1117;
-      --card-bg: rgba(22, 27, 34, 0.75);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --accent-color: #1a4da6;
-      --badge-text: #38bdf8;
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --warning: #ca8a04;
+      --danger: #dc2626;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-    header { background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(12px); border-bottom: 2px solid #ed1c24; position: sticky; top: 0; z-index: 100; }
-    nav { max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 700; }
-    .logo-container img { height: 48px; width: auto; object-fit: contain; }
-    .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
-    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: #fca311; }
-    .btn-logout { background-color: #ed1c24; color: #fff !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; cursor: pointer; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
 
-    .dashboard-container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 2rem 1.5rem; flex: 1; }
+    /* Sidebar */
+    aside {
+      width: 260px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+    }
 
-    .welcome-banner { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-    .welcome-text h1 { font-size: 1.5rem; color: #fff; margin-bottom: 0.25rem; }
-    .welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
-    .faculty-badge { background: rgba(26, 77, 166, 0.3); color: var(--badge-text); border: 1px solid var(--accent-color); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .sidebar-brand h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.2rem;
+      color: #f8fafc;
+    }
 
-    /* Faculty Profile Card Styles */
-    .profile-card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-    .profile-img-container { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-color); background: #0d1117; flex-shrink: 0; }
-    .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-upload-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); text-align: center; padding: 4px 0; cursor: pointer; font-size: 0.75rem; color: #38bdf8; font-weight: 600; }
-    .profile-info { flex: 1; min-width: 250px; }
-    .profile-info h3 { font-size: 1.25rem; color: #fff; margin-bottom: 0.25rem; }
-    .profile-info p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; }
-    .bio-textarea { width: 100%; background: rgba(13, 17, 23, 0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; padding: 0.5rem; font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; margin-top: 0.5rem; }
-    .bio-textarea:focus { border-color: #38bdf8; }
-    .btn-save-bio { background: #38bdf8; color: #0d1117; border: none; padding: 0.35rem 0.85rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-top: 0.4rem; transition: background 0.2s; }
-    .btn-save-bio:hover { background: #0ea5e9; }
-    @media (max-width: 900px) { .profile-card { flex-direction: column; text-align: center; justify-content: center; } }
+    .sidebar-brand p {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
 
-    .card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-    .card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .sidebar-menu {
+      list-style: none;
+      margin-top: 2rem;
+      flex-grow: 1;
+    }
 
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
-    .form-control { width: 100%; padding: 0.65rem; background: rgba(13, 17, 23, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
-    .form-control:focus { border-color: #38bdf8; }
+    .sidebar-menu li {
+      margin-bottom: 0.5rem;
+    }
 
-    .btn-action { background: #1a4da6; color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-    .btn-action:hover { background: #143b85; }
+    .sidebar-menu a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: background 0.2s, color 0.2s;
+    }
 
-    .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .class-card { background: rgba(13, 17, 23, 0.6); border: 1px solid var(--border-color); border-left: 4px solid #fca311; border-radius: 8px; padding: 1rem; position: relative; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
-    .class-card.active { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
-    .class-card h4 { font-size: 1rem; color: #fff; margin-bottom: 0.4rem; }
-    .class-card p { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.2rem; }
-    .class-card .btn-delete-class { position: absolute; top: 0.75rem; right: 0.75rem; background: transparent; border: none; color: #f87171; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
 
-    .filter-bar { display: flex; gap: 1rem; background: rgba(13, 17, 23, 0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .sidebar-footer button {
+      width: 100%;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      padding: 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .stat-card { background: rgba(13, 17, 23, 0.6); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 10px; }
-    .stat-card .label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
-    .stat-card .value { font-size: 1.8rem; font-weight: 800; color: #fff; margin-top: 0.25rem; }
+    .sidebar-footer button:hover {
+      background: rgba(239, 68, 68, 0.4);
+      color: white;
+    }
 
-    .table-responsive { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.85rem; }
-    th, td { text-align: left; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-    th { color: var(--text-secondary); font-weight: 600; }
-    
-    .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
-    .status-present { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
-    .status-late { background: rgba(234, 179, 8, 0.2); color: #facc15; }
-    .status-out { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    /* Main Content Area */
+    main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    header {
+      background: var(--card-bg);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    .user-info {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .content-body {
+      padding: 2rem;
+      flex-grow: 1;
+    }
+
+    /* Statistics Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .stat-card h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .number {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    /* Filters & Tables */
+    .table-container {
+      background: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .table-header h2 {
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .filter-group select, .filter-group input {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      outline: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    tbody tr:hover {
+      background: #fdfdfd;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-present { background: #dcfce7; color: var(--success); }
+    .status-late { background: #fef9c3; color: var(--warning); }
+    .status-out { background: #fee2e2; color: var(--danger); }
   </style>
 </head>
 <body>
 
-  <header>
-    <nav>
-      <a href="index.html" class="logo-container">
-        <img src="TCU_logo_2024.png" alt="TCU Logo">
-        <span>TCU Faculty Portal</span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="registerpageproject.html">Register</a></li>
-        <li><a href="#" class="btn-logout" onclick="logout()">Logout</a></li>
+  <!-- Sidebar -->
+  <aside>
+    <div>
+      <div class="sidebar-brand">
+        <h2>Faculty Portal</h2>
+        <p>Smart Attendance System</p>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#" class="active">Live Attendance</a></li>
+        <li><a href="#" onclick="alert('Feature coming soon!')">Class Reports</a></li>
+        <li><a href="#" onclick="alert('Feature coming soon!')">Student Management</a></li>
       </ul>
-    </nav>
-  </header>
-
-  <main class="dashboard-container">
-    <div class="welcome-banner">
-      <div class="welcome-text">
-        <h1 id="faculty-name-heading">Welcome back, Professor!</h1>
-        <p id="faculty-info-sub">Faculty ID: Loading... | Email: Loading...</p>
-      </div>
-      <div>
-        <span class="faculty-badge" id="faculty-dept-badge">College of Information Systems</span>
-      </div>
     </div>
-
-    <!-- FACULTY PROFILE SECTION -->
-    <div class="profile-card">
-      <div class="profile-img-container">
-        <img id="facultyProfilePicture" src="https://via.placeholder.com/150?text=Faculty" alt="Faculty Profile Picture">
-        <div class="profile-upload-overlay" onclick="document.getElementById('facultyImgInput').click()">
-          📷 Upload
-        </div>
-        <input type="file" id="facultyImgInput" accept="image/*" style="display: none;" onchange="handleFacultyProfileUpload(event)">
-      </div>
-
-      <div class="profile-info">
-        <h3 id="profileFacultyName">Prof. Faculty Name</h3>
-        <p id="profileFacultyMeta">Department | Faculty ID</p>
-        
-        <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1;">Faculty Bio / Consultation Hours:</label>
-        <textarea id="facultyBioInput" class="bio-textarea" placeholder="Enter consultation schedule, office room, or bio..."></textarea>
-        <button class="btn-save-bio" onclick="saveFacultyBio()">Save Bio</button>
-      </div>
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()">Sign Out</button>
     </div>
+  </aside>
 
-    <!-- Department & Section Management -->
-    <div class="card">
-      <div class="card-title">
-        <span>➕ Add Department & Section Assignment</span>
-      </div>
-      <form onsubmit="handleAddClass(event)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="newDept">Department / College</label>
-            <select id="newDept" class="form-control" required>
-              <option value="College of Information Systems">College of Information Systems</option>
-              <option value="College of Business Administration">College of Business Administration</option>
-              <option value="College of Computer Science">College of Computer Science</option>
-              <option value="College of Engineering">College of Engineering</option>
-              <option value="College of Education">College of Education</option>
-            </select>
-          </div>
+  <!-- Main Area -->
+  <main>
+    <header>
+      <h1>Attendance Dashboard</h1>
+      <div class="user-info" id="facultyWelcome">Welcome, Faculty Member</div>
+    </header>
 
-          <div class="form-group">
-            <label for="newSection">Section</label>
-            <input type="text" id="newSection" class="form-control" placeholder="e.g. BSIS 1C" required>
-          </div>
-
-          <div class="form-group">
-            <label for="newRoom">Room Assignment</label>
-            <input type="text" id="newRoom" class="form-control" placeholder="e.g. 308" required>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-action" style="margin-top: 1rem;">+ Add Class</button>
-      </form>
-
-      <div style="margin-top: 1.5rem;">
-        <h4 style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 0.5rem;">Select Class Assignment to View Specific Attendance:</h4>
-        <div class="class-grid" id="assignedClassesContainer"></div>
-      </div>
-    </div>
-
-    <!-- Attendance Record Filter Controls -->
-    <div class="card">
-      <div class="card-title">
-        <span>📊 Department & Section Attendance Records (Honor Privacy)</span>
-        <button class="btn-action" style="padding: 0.35rem 0.75rem;" onclick="loadAttendanceRecords()">🔄 Refresh Data</button>
-      </div>
-
-      <div class="filter-bar">
-        <div class="form-group" style="flex: 1; min-width: 200px;">
-          <label for="filterDept">Filter by Department</label>
-          <select id="filterDept" class="form-control" onchange="loadAttendanceRecords()">
-            <option value="ALL">All Departments</option>
-            <option value="College of Information Systems">College of Information Systems</option>
-            <option value="College of Business Administration">College of Business Administration</option>
-            <option value="College of Computer Science">College of Computer Science</option>
-            <option value="College of Engineering">College of Engineering</option>
-            <option value="College of Education">College of Education</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="flex: 1; min-width: 200px;">
-          <label for="filterSection">Filter by Section / Subject Code</label>
-          <input type="text" id="filterSection" class="form-control" placeholder="Type section/subject e.g. BSIS 1C, CC 101" oninput="loadAttendanceRecords()">
-        </div>
-      </div>
-
+    <div class="content-body">
+      <!-- Stats Overview -->
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="label">Total Public Submissions</div>
-          <div class="value" id="stat-total">0</div>
+          <h3>Total Records</h3>
+          <div class="number" id="stat-total">0</div>
         </div>
         <div class="stat-card">
-          <div class="label">Present</div>
-          <div class="value" style="color: #4ade80;" id="stat-present">0</div>
+          <h3>Present</h3>
+          <div class="number" id="stat-present" style="color: var(--success);">0</div>
         </div>
         <div class="stat-card">
-          <div class="label">Late</div>
-          <div class="value" style="color: #facc15;" id="stat-late">0</div>
+          <h3>Late</h3>
+          <div class="number" id="stat-late" style="color: var(--warning);">0</div>
         </div>
         <div class="stat-card">
-          <div class="label">Signed Out</div>
-          <div class="value" style="color: #f87171;" id="stat-out">0</div>
+          <h3>Signed Out</h3>
+          <div class="number" id="stat-out" style="color: var(--danger);">0</div>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Student ID</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Subject / Section</th>
-              <th>Room</th>
-              <th>Type</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="facultyTableBody"></tbody>
-        </table>
+      <!-- Table Section -->
+      <div class="table-container">
+        <div class="table-header">
+          <h2>Student Attendance Logs</h2>
+          <div class="filter-group">
+            <select id="filterDept" onchange="loadAttendanceRecords()">
+              <option value="ALL">All Departments</option>
+              <option value="CCS">CCS</option>
+              <option value="CBA">CBA</option>
+              <option value="CAS">CAS</option>
+              <option value="COE">COE</option>
+            </select>
+            <input type="text" id="filterSection" placeholder="Filter by Subject/Section" onkeyup="loadAttendanceRecords()">
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Student ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Subject Code</th>
+                <th>Room</th>
+                <th>Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="facultyTableBody">
+              <tr>
+                <td colspan="8" style="text-align:center; color: var(--text-muted); padding: 1.5rem;">Loading records from Firebase...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
 
-  <script>
-    let defaultClasses = [
-      { dept: "College of Information Systems", section: "BSIS 1C", room: "308" },
-      { dept: "College of Computer Science", section: "BSCS 2B", room: "COMPLAB111" }
-    ];
+  <!-- Firebase SDKs & Faculty Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    let selectedClassIndex = null;
-    let currentFaculty = null;
+    const firebaseConfig = {
+      apiKey: "AIzaSyAUe90Z8XTSKSPJNwFEsV41ZQnv-oUGRmA",
+      authDomain: "smart-attendance-68397.firebaseapp.com",
+      projectId: "smart-attendance-68397",
+      storageBucket: "smart-attendance-68397.firebasestorage.app",
+      messagingSenderId: "47063749826",
+      appId: "1:47063749826:web:06b25a63b19836d009575b",
+      measurementId: "G-KBPYMMT4B1"
+    };
 
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // I-verify kung naka-login ang faculty
     window.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('tcu_faculty_user');
-      
-      if (savedUser) {
-        currentFaculty = JSON.parse(savedUser);
-      } else {
-        alert('No registered faculty session found. Please register first.');
-        window.location.href = 'registerpageproject.html';
+      const facultyData = localStorage.getItem('tcu_faculty_user');
+      if (!facultyData) {
+        alert('Unauthorized access! Please login as faculty first.');
+        window.location.href = 'logpageproject.html';
         return;
       }
-
-      document.getElementById('faculty-name-heading').textContent = `Welcome back, Prof. ${currentFaculty.name}!`;
-      document.getElementById('faculty-info-sub').textContent = `Faculty ID: ${currentFaculty.id} | Email: ${currentFaculty.email}`;
-      document.getElementById('faculty-dept-badge').textContent = currentFaculty.department;
-
-      document.getElementById('profileFacultyName').textContent = `Prof. ${currentFaculty.name}`;
-      document.getElementById('profileFacultyMeta').textContent = `${currentFaculty.department} | Faculty ID: ${currentFaculty.id}`;
-
-      loadFacultyProfileData();
-      renderAssignedClasses();
+      const user = JSON.parse(facultyData);
+      document.getElementById('facultyWelcome').textContent = `Welcome, ${user.fullName || user.email || 'Faculty'}`;
       loadAttendanceRecords();
     });
 
-    /* FACULTY PROFILE FUNCTIONS */
-    function handleFacultyProfileUpload(e) {
-      const file = e.target.files[0];
-      if (file && currentFaculty) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const imgData = event.target.result;
-          document.getElementById('facultyProfilePicture').src = imgData;
-          localStorage.setItem(`tcu_faculty_profile_img_${currentFaculty.id}`, imgData);
-          alert('Faculty profile picture updated successfully!');
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    function saveFacultyBio() {
-      if (!currentFaculty) return;
-      const bioText = document.getElementById('facultyBioInput').value;
-      localStorage.setItem(`tcu_faculty_bio_${currentFaculty.id}`, bioText);
-      alert('Faculty Bio / Consultation hours saved successfully!');
-    }
-
-    function loadFacultyProfileData() {
-      if (!currentFaculty) return;
-      const savedImg = localStorage.getItem(`tcu_faculty_profile_img_${currentFaculty.id}`);
-      if (savedImg) {
-        document.getElementById('facultyProfilePicture').src = savedImg;
-      }
-
-      const savedBio = localStorage.getItem(`tcu_faculty_bio_${currentFaculty.id}`);
-      if (savedBio) {
-        document.getElementById('facultyBioInput').value = savedBio;
-      }
-    }
-
-    function getStoredClasses() {
-      const stored = localStorage.getItem('tcu_faculty_classes');
-      return stored ? JSON.parse(stored) : defaultClasses;
-    }
-
-    function renderAssignedClasses() {
-      const container = document.getElementById('assignedClassesContainer');
-      const classesList = getStoredClasses();
-      container.innerHTML = '';
-
-      if (classesList.length === 0) {
-        container.innerHTML = `<p style="font-size: 0.85rem; color: #94a3b8;">No class assignments added yet.</p>`;
-        return;
-      }
-
-      classesList.forEach((cls, index) => {
-        const card = document.createElement('div');
-        card.className = `class-card ${selectedClassIndex === index ? 'active' : ''}`;
-        card.onclick = () => selectClassFilter(index, cls);
-
-        card.innerHTML = `
-          <button class="btn-delete-class" onclick="removeClass(event, ${index})">&times;</button>
-          <h4>${cls.section}</h4>
-          <p>🏫 <b>Dept:</b> ${cls.dept}</p>
-          <p>📍 <b>Room:</b> ${cls.room}</p>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function selectClassFilter(index, cls) {
-      if (selectedClassIndex === index) {
-        selectedClassIndex = null;
-        document.getElementById('filterDept').value = 'ALL';
-        document.getElementById('filterSection').value = '';
-      } else {
-        selectedClassIndex = index;
-        document.getElementById('filterDept').value = cls.dept;
-        document.getElementById('filterSection').value = cls.section;
-      }
-      renderAssignedClasses();
-      loadAttendanceRecords();
-    }
-
-    function handleAddClass(e) {
-      e.preventDefault();
-      const dept = document.getElementById('newDept').value;
-      const section = document.getElementById('newSection').value.trim();
-      const room = document.getElementById('newRoom').value.trim();
-
-      const classesList = getStoredClasses();
-      classesList.push({ dept, section, room });
-
-      localStorage.setItem('tcu_faculty_classes', JSON.stringify(classesList));
-
-      document.getElementById('newSection').value = '';
-      document.getElementById('newRoom').value = '';
-
-      renderAssignedClasses();
-      alert(`Class ${section} (${room}) successfully added!`);
-    }
-
-    function removeClass(e, index) {
-      e.stopPropagation();
-      let classesList = getStoredClasses();
-      const targetClass = classesList[index];
-
-      const confirmed = confirm(`Are you sure you want to remove ${targetClass ? targetClass.section : 'this class assignment'}? This action cannot be undone.`);
-      
-      if (confirmed) {
-        classesList.splice(index, 1);
-        localStorage.setItem('tcu_faculty_classes', JSON.stringify(classesList));
-        if (selectedClassIndex === index) selectedClassIndex = null;
-        renderAssignedClasses();
-        loadAttendanceRecords();
-      }
-    }
-
-    function loadAttendanceRecords() {
-      const records = JSON.parse(localStorage.getItem('tcu_attendance_records') || '[]');
+    window.loadAttendanceRecords = async function() {
       const tbody = document.getElementById('facultyTableBody');
-      tbody.innerHTML = '';
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 1.5rem;">Loading records from Firebase...</td></tr>`;
 
       const deptFilter = document.getElementById('filterDept').value;
       const sectionFilter = document.getElementById('filterSection').value.trim().toLowerCase();
 
-      // Filter records and strictly honor student privacy setting (isPublic !== false)
-      const filteredRecords = records.filter(rec => {
-        if (rec.isPublic === false) return false;
-
-        const matchDept = (deptFilter === 'ALL') || (rec.department === deptFilter);
-        const subjectOrSection = (rec.subjectCode || '').toLowerCase();
-        const matchSection = !sectionFilter || subjectOrSection.includes(sectionFilter);
-
-        return matchDept && matchSection;
-      });
-
-      let presentCount = 0;
-      let lateCount = 0;
-      let outCount = 0;
-
-      if (filteredRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #94a3b8; padding: 1.5rem;">No public attendance entries found.</td></tr>`;
-      } else {
-        filteredRecords.forEach(rec => {
-          let badgeClass = 'status-present';
-          if (rec.status === 'PRESENT') { presentCount++; badgeClass = 'status-present'; }
-          else if (rec.status === 'LATE') { lateCount++; badgeClass = 'status-late'; }
-          else if (rec.status === 'SIGNED_OUT') { outCount++; badgeClass = 'status-out'; }
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${rec.timestamp}</td>
-            <td><b>${rec.studentId}</b></td>
-            <td>${rec.fullName}</td>
-            <td>${rec.email}</td>
-            <td>${rec.subjectCode}</td>
-            <td>${rec.room}</td>
-            <td>${rec.type}</td>
-            <td><span class="status-badge ${badgeClass}">${rec.status}</span></td>
-          `;
-          tbody.appendChild(tr);
+      try {
+        const querySnapshot = await getDocs(collection(db, 'attendance'));
+        let records = [];
+        querySnapshot.forEach((doc) => {
+          records.push(doc.data());
         });
+
+        const filteredRecords = records.filter(rec => {
+          if (rec.isPublic === false) return false;
+          const matchDept = (deptFilter === 'ALL') || (rec.department === deptFilter);
+          const subjectOrSection = (rec.subjectCode || '').toLowerCase();
+          const matchSection = !sectionFilter || subjectOrSection.includes(sectionFilter);
+          return matchDept && matchSection;
+        });
+
+        tbody.innerHTML = '';
+        let presentCount = 0, lateCount = 0, outCount = 0;
+
+        if (filteredRecords.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 1.5rem;">No attendance entries found in database.</td></tr>`;
+        } else {
+          filteredRecords.forEach(rec => {
+            let badgeClass = 'status-present';
+            if (rec.status === 'PRESENT') { presentCount++; badgeClass = 'status-present'; }
+            else if (rec.status === 'LATE') { lateCount++; badgeClass = 'status-late'; }
+            else if (rec.status === 'SIGNED_OUT') { outCount++; badgeClass = 'status-out'; }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${rec.timestamp || 'N/A'}</td>
+              <td><b>${rec.studentId || ''}</b></td>
+              <td>${rec.fullName || ''}</td>
+              <td>${rec.email || ''}</td>
+              <td>${rec.subjectCode || ''}</td>
+              <td>${rec.room || ''}</td>
+              <td>${rec.type || ''}</td>
+              <td><span class="status-badge ${badgeClass}">${rec.status || ''}</span></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+
+        document.getElementById('stat-total').textContent = filteredRecords.length;
+        document.getElementById('stat-present').textContent = presentCount;
+        document.getElementById('stat-late').textContent = lateCount;
+        document.getElementById('stat-out').textContent = outCount;
+
+      } catch (error) {
+        console.error("Error loading attendance:", error);
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--danger); padding: 1.5rem;">Failed to load records from Firebase.</td></tr>`;
       }
+    };
 
-      document.getElementById('stat-total').textContent = filteredRecords.length;
-      document.getElementById('stat-present').textContent = presentCount;
-      document.getElementById('stat-late').textContent = lateCount;
-      document.getElementById('stat-out').textContent = outCount;
-    }
-
-    function logout() {
+    window.handleLogout = function() {
       localStorage.removeItem('tcu_faculty_user');
-      alert('Logged out successfully.');
-      window.location.href = 'registerpageproject.html';
-    }
+      window.location.href = 'logpageproject.html';
+    };
   </script>
 </body>
 </html>
