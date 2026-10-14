@@ -92,14 +92,25 @@
           <input type="email" id="regEmail" class="form-control" placeholder="username@tcu.edu.ph" required>
         </div>
 
+        <!-- Department Selection -->
         <div class="form-group">
-          <label id="deptLabel">Department / Program</label>
-          <select id="regDept" class="form-control">
-            <option value="BS Information Systems">BS Information Systems</option>
-            <option value="BS Computer Science">BS Computer Science</option>
-            <option value="BS Business Administration">BS Business Administration</option>
-            <option value="BS Engineering">BS Engineering</option>
-            <option value="BS Education">BS Education</option>
+          <label id="deptLabel">Department</label>
+          <select id="regDept" class="form-control" onchange="updateCourses()" required>
+            <option value="">Select Department</option>
+            <option value="CICT">CICT</option>
+            <option value="CCJ">CCJ</option>
+            <option value="CHTM">CHTM</option>
+            <option value="CILT">CILT</option>
+            <option value="CBM">CBM</option>
+            <option value="CAS">CAS</option>
+          </select>
+        </div>
+
+        <!-- Course Selection (Dynamic for Students, Hidden/Optional for Faculty) -->
+        <div class="form-group" id="courseGroup">
+          <label id="courseLabel">Course / Program</label>
+          <select id="regCourse" class="form-control" required>
+            <option value="">Select Department First</option>
           </select>
         </div>
 
@@ -126,6 +137,34 @@
   <script>
     let currentRole = 'student';
 
+    const departmentCourses = {
+      "CICT": ["Information Systems", "Computer Science"],
+      "CCJ": ["Criminology"],
+      "CHTM": ["Hospitality & Tourism Management"],
+      "CILT": ["Elementary Education", "Secondary Education"],
+      "CBM": ["Business Administration", "Entrepreneurship / Entrepreneurial Management", "Office Administration / Office Management"],
+      "CAS": ["Psychology", "Public Administration"]
+    };
+
+    function updateCourses() {
+      const deptSelect = document.getElementById('regDept');
+      const courseSelect = document.getElementById('regCourse');
+      const chosenDept = deptSelect.value;
+
+      courseSelect.innerHTML = '<option value="">Select Course</option>';
+
+      if (currentRole === 'faculty') return;
+
+      if (chosenDept && departmentCourses[chosenDept]) {
+        departmentCourses[chosenDept].forEach(course => {
+          const opt = document.createElement('option');
+          opt.value = course;
+          opt.textContent = course;
+          courseSelect.appendChild(opt);
+        });
+      }
+    }
+
     function switchRole(role) {
       currentRole = role;
       const btnStu = document.getElementById('btnStudent');
@@ -134,9 +173,14 @@
       const sub = document.getElementById('formSubtitle');
       const idLbl = document.getElementById('idLabel');
       const deptLbl = document.getElementById('deptLabel');
+      const courseGroup = document.getElementById('courseGroup');
+      const regCourse = document.getElementById('regCourse');
       const subBtn = document.getElementById('regSubmitBtn');
       const facultyCodeGroup = document.getElementById('facultyCodeGroup');
       const facultyCodeInput = document.getElementById('regFacultyCode');
+      const regDept = document.getElementById('regDept');
+
+      regDept.value = ""; // Reset department selection
 
       if (role === 'student') {
         btnStu.className = 'role-btn active-student';
@@ -144,7 +188,9 @@
         title.textContent = 'Create Student Account';
         sub.textContent = 'Register your details for attendance tracking';
         idLbl.textContent = 'Student ID Number';
-        deptLbl.textContent = 'Department / Program';
+        deptLbl.textContent = 'Department';
+        courseGroup.style.display = 'flex';
+        regCourse.setAttribute('required', 'true');
         subBtn.textContent = 'Register Student Account';
         subBtn.style.background = '#fca311';
         subBtn.style.color = '#0d1117';
@@ -158,6 +204,8 @@
         sub.textContent = 'Register your details for class QR tracking';
         idLbl.textContent = 'Faculty ID Number';
         deptLbl.textContent = 'Department / College';
+        courseGroup.style.display = 'none'; // Faculty don't need specific program
+        regCourse.removeAttribute('required');
         subBtn.textContent = 'Register Faculty Account';
         subBtn.style.background = '#1a4da6';
         subBtn.style.color = '#fff';
@@ -165,6 +213,7 @@
         facultyCodeGroup.style.display = 'flex';
         facultyCodeInput.setAttribute('required', 'true');
       }
+      updateCourses();
     }
   </script>
 
@@ -193,6 +242,7 @@
       const id = document.getElementById('regId').value.trim();
       const email = document.getElementById('regEmail').value.trim();
       const department = document.getElementById('regDept').value;
+      const course = currentRole === 'student' ? document.getElementById('regCourse').value : '';
       const pass = document.getElementById('regPass').value;
 
       if (currentRole === 'faculty') {
@@ -211,7 +261,8 @@
         fullName: name, 
         idNumber: id, 
         email: email, 
-        department: department, 
+        department: department,
+        course: course,
         role: currentRole,
         registeredAt: serverTimestamp() 
       };
@@ -225,7 +276,7 @@
         // Backup to LocalStorage para sa login system mo
         if (currentRole === 'student') {
           let students = JSON.parse(localStorage.getItem('tcu_registered_students')) || [];
-          students.push({ name, id, email, department, pass });
+          students.push({ name, id, email, department, course, pass });
           localStorage.setItem('tcu_registered_students', JSON.stringify(students));
         } else {
           let facultyList = JSON.parse(localStorage.getItem('tcu_registered_faculty')) || [];
