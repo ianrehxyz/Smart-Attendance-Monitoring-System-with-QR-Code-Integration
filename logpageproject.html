@@ -54,7 +54,6 @@
 
   <header>
     <nav>
-      <!-- Naayos: Nakaturo na sa index.html -->
       <a href="index.html" class="logo-container">
         <img src="TCU_logo_2024.png" alt="TCU Logo">
         <span>TCU Attendance</span>
@@ -73,7 +72,7 @@
 
       <div class="role-switch">
         <div class="role-btn active-student" id="btnStudentLogin" onclick="switchLoginRole('student')">Student Login</div>
-        <div class="role-btn" id="btnFacultyLogin" onclick="switchLoginRole('faculty')">Faculty Login</div>
+        <div class="role-btn" id="btnFaculty" onclick="switchLoginRole('faculty')">Faculty Login</div>
       </div>
 
       <form id="loginForm" onsubmit="handleLogin(event)">
@@ -97,12 +96,18 @@
   </main>
 
   <script>
+    // Siguraduhing malinis ang session pagpunta sa login page
+    window.addEventListener('DOMContentLoaded', () => {
+      localStorage.removeItem('tcu_logged_in_student');
+      localStorage.removeItem('tcu_logged_in_faculty');
+    });
+
     let loginRole = 'student';
 
     function switchLoginRole(role) {
       loginRole = role;
       const btnStu = document.getElementById('btnStudentLogin');
-      const btnFac = document.getElementById('btnFacultyLogin');
+      const btnFac = document.getElementById('btnFaculty');
       const title = document.getElementById('loginTitle');
       const sub = document.getElementById('loginSubtitle');
       const idLbl = document.getElementById('loginIdLabel');
@@ -139,7 +144,7 @@
         const foundStudent = students.find(s => (s.id === inputId || s.email === inputId) && s.pass === inputPass);
 
         if (foundStudent) {
-          localStorage.setItem('tcu_student_user', JSON.stringify(foundStudent));
+          localStorage.setItem('tcu_logged_in_student', JSON.stringify(foundStudent));
           alert('Student login successful! Welcome back, ' + foundStudent.name);
           window.location.href = 'studentprojectpage.html';
         } else {
@@ -150,7 +155,7 @@
         const foundFaculty = facultyList.find(f => (f.id === inputId || f.email === inputId) && f.pass === inputPass);
 
         if (foundFaculty) {
-          localStorage.setItem('tcu_faculty_user', JSON.stringify(foundFaculty));
+          localStorage.setItem('tcu_logged_in_faculty', JSON.stringify(foundFaculty));
           alert('Faculty login successful! Welcome back, Prof. ' + foundFaculty.name);
           window.location.href = 'facultypageproject.html';
         } else {
