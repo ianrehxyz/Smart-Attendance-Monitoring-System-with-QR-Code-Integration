@@ -96,12 +96,6 @@
   </main>
 
   <script>
-    // Siguraduhing malinis ang session pagpunta sa login page
-    window.addEventListener('DOMContentLoaded', () => {
-      localStorage.removeItem('tcu_logged_in_student');
-      localStorage.removeItem('tcu_logged_in_faculty');
-    });
-
     let loginRole = 'student';
 
     function switchLoginRole(role) {
@@ -155,7 +149,9 @@
         const foundFaculty = facultyList.find(f => (f.id === inputId || f.email === inputId) && f.pass === inputPass);
 
         if (foundFaculty) {
+          // Sinisigurong ito ang gagamitin ng dashboard para hindi mag-fallback kay Adrianne
           localStorage.setItem('tcu_logged_in_faculty', JSON.stringify(foundFaculty));
+          
           alert('Faculty login successful! Welcome back, Prof. ' + foundFaculty.name);
           window.location.href = 'facultypageproject.html';
         } else {
