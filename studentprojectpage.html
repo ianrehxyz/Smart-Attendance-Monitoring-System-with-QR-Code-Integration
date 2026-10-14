@@ -334,7 +334,7 @@
       updateLiveTimestamp();
       setInterval(updateLiveTimestamp, 1000);
 
-      const savedUser = localStorage.getItem('tcu_student_user');
+      const savedUser = localStorage.getItem('tcu_student_user') || localStorage.getItem('tcu_user');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
         initUserData();
@@ -354,12 +354,12 @@
 
     function initUserData() {
       const studentName = currentUser.fullName || currentUser.name || "Student";
-      const studentIdNum = currentUser.idNumber || currentUser.id || "";
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id || "";
       const studentDept = currentUser.department || "CICT";
       const studentCourse = currentUser.course || "Information Systems";
 
       document.getElementById('student-name-heading').textContent = `Welcome back, ${studentName}!`;
-      document.getElementById('student-info-sub').textContent = `Student ID: ${studentIdNum} | Email: ${currentUser.email}`;
+      document.getElementById('student-info-sub').textContent = `Student ID: ${studentIdNum} | Email: ${currentUser.email || ''}`;
       document.getElementById('student-course-badge').textContent = `${studentDept} - ${studentCourse}`;
       
       document.getElementById('profileFullName').textContent = studentName;
@@ -394,7 +394,7 @@
 
     async function handleProfilePictureUpload(e) {
       const file = e.target.files[0];
-      const studentIdNum = currentUser.idNumber || currentUser.id;
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
       if (file && currentUser && studentIdNum) {
         const reader = new FileReader();
         reader.onload = async function(event) {
@@ -417,7 +417,7 @@
 
     async function saveAboutMe() {
       const bioText = document.getElementById('aboutMeInput').value;
-      const studentIdNum = currentUser.idNumber || currentUser.id;
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
       if (!currentUser || !studentIdNum) return;
 
       try {
@@ -433,7 +433,7 @@
     }
 
     async function loadProfileFromFirebase() {
-      const studentIdNum = currentUser.idNumber || currentUser.id;
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
       if (!currentUser || !window.db || !studentIdNum) return;
       try {
         const { doc, getDoc } = window.firebaseModules;
@@ -461,7 +461,7 @@
 
     async function handleScheduleUpload(e) {
       const file = e.target.files[0];
-      const studentIdNum = currentUser.idNumber || currentUser.id;
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
       if (file && currentUser && studentIdNum) {
         const reader = new FileReader();
         reader.onload = async function(event) {
@@ -503,7 +503,7 @@
     }
 
     async function checkDailySubmissionStatus() {
-      const studentIdNum = currentUser.idNumber || currentUser.id;
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
       if (!currentUser || !window.db || !studentIdNum) return;
       const todayStr = new Date().toLocaleDateString();
 
@@ -537,7 +537,7 @@
 
     async function handleAttendanceSubmit(e) {
       e.preventDefault();
-      const studentIdNum = currentUser.idNumber || currentUser.id;
+      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
       if (!currentUser || !window.db || !studentIdNum) return;
 
       const now = new Date();
@@ -634,7 +634,7 @@
       }
 
       let records = [];
-      const studentIdNum = currentUser ? (currentUser.idNumber || currentUser.id) : null;
+      const studentIdNum = currentUser ? (currentUser.studentId || currentUser.idNumber || currentUser.id) : null;
       if (window.db && studentIdNum) {
         try {
           const { collection, getDocs, query, where } = window.firebaseModules;
@@ -674,6 +674,7 @@
 
     function logout() {
       localStorage.removeItem('tcu_student_user');
+      localStorage.removeItem('tcu_user');
       window.location.href = 'logpageproject.html';
     }
   </script>
