@@ -7,17 +7,17 @@
   
   <!-- Firebase SDK Setup -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // PALITAN ITO NG MGA TUNAY MONG FIREBASE CONFIG DETAILS
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyAUe90Z8XTSKSPJNwFEsV41ZQnv-oUGRmA",
+      authDomain: "smart-attendance-68397.firebaseapp.com",
+      projectId: "smart-attendance-68397",
+      storageBucket: "smart-attendance-68397.firebasestorage.app",
+      messagingSenderId: "47063749826",
+      appId: "1:47063749826:web:06b25a63b19836d009575b",
+      measurementId: "G-KBPYMMT4B1"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -26,7 +26,6 @@
     window.db = db;
     window.firebaseModules = { doc, setDoc, getDoc, collection, addDoc, getDocs, query, where };
     
-    // Trigger event kapag handa na ang Firebase para ma-load ang data
     window.dispatchEvent(new Event('firebase-ready'));
   </script>
 
@@ -285,7 +284,6 @@
       initApp();
     });
 
-    // Fallback kung nauna mag-load ang DOM kaysa sa module
     window.addEventListener('DOMContentLoaded', () => {
       updateLiveTimestamp();
       setInterval(updateLiveTimestamp, 1000);
@@ -309,22 +307,27 @@
     }
 
     function initUserData() {
-      document.getElementById('student-name-heading').textContent = `Welcome back, ${currentUser.name}!`;
-      document.getElementById('student-info-sub').textContent = `Student ID: ${currentUser.id} | Email: ${currentUser.email}`;
-      document.getElementById('student-course-badge').textContent = currentUser.department || 'BS Information Systems';
+      // Kinukuha ang tamang property names galing sa register/login page (fullName at idNumber)
+      const studentName = currentUser.fullName || currentUser.name || "Student";
+      const studentIdNum = currentUser.idNumber || currentUser.id || "";
+      const studentDept = currentUser.department || "BS Information Systems";
+
+      document.getElementById('student-name-heading').textContent = `Welcome back, ${studentName}!`;
+      document.getElementById('student-info-sub').textContent = `Student ID: ${studentIdNum} | Email: ${currentUser.email}`;
+      document.getElementById('student-course-badge').textContent = studentDept;
       
-      document.getElementById('profileFullName').textContent = currentUser.name;
-      document.getElementById('profileMeta').textContent = `${currentUser.department || 'BS Information Systems'} | Student ID: ${currentUser.id}`;
+      document.getElementById('profileFullName').textContent = studentName;
+      document.getElementById('profileMeta').textContent = `${studentDept} | Student ID: ${studentIdNum}`;
 
       document.getElementById('email').value = currentUser.email || '';
-      document.getElementById('studentId').value = currentUser.id || '';
+      document.getElementById('studentId').value = studentIdNum;
       
-      const nameParts = currentUser.name.trim().split(' ');
+      const nameParts = studentName.trim().split(' ');
       if (nameParts.length >= 2) {
         document.getElementById('firstName').value = nameParts[0];
         document.getElementById('lastName').value = nameParts[nameParts.length - 1];
       } else {
-        document.getElementById('firstName').value = currentUser.name;
+        document.getElementById('firstName').value = studentName;
       }
 
       if (window.db) {
@@ -339,10 +342,10 @@
       document.getElementById('autoTimestamp').value = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
     }
 
-    // --- FIREBASE PROFILE & BIO FUNCTIONS ---
     async function handleProfilePictureUpload(e) {
       const file = e.target.files[0];
-      if (file && currentUser) {
+      const studentIdNum = currentUser.idNumber || currentUser.id;
+      if (file && currentUser && studentIdNum) {
         const reader = new FileReader();
         reader.onload = async function(event) {
           const imgData = event.target.result;
@@ -350,7 +353,7 @@
           
           try {
             const { doc, setDoc } = window.firebaseModules;
-            await setDoc(doc(window.db, "students", currentUser.id), {
+            await setDoc(doc(window.db, "students", studentIdNum), {
               profileImg: imgData
             }, { merge: true });
             alert('Profile picture updated successfully in Firebase!');
@@ -364,11 +367,12 @@
 
     async function saveAboutMe() {
       const bioText = document.getElementById('aboutMeInput').value;
-      if (!currentUser) return;
+      const studentIdNum = currentUser.idNumber || currentUser.id;
+      if (!currentUser || !studentIdNum) return;
 
       try {
         const { doc, setDoc } = window.firebaseModules;
-        await setDoc(doc(window.db, "students", currentUser.id), {
+        await setDoc(doc(window.db, "students", studentIdNum), {
           bio: bioText
         }, { merge: true });
         alert('About Me updated successfully in Firebase!');
@@ -379,10 +383,11 @@
     }
 
     async function loadProfileFromFirebase() {
-      if (!currentUser || !window.db) return;
+      const studentIdNum = currentUser.idNumber || currentUser.id;
+      if (!currentUser || !window.db || !studentIdNum) return;
       try {
         const { doc, getDoc } = window.firebaseModules;
-        const docSnap = await getDoc(doc(window.db, "students", currentUser.id));
+        const docSnap = await getDoc(doc(window.db, "students", studentIdNum));
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.profileImg) {
@@ -406,7 +411,8 @@
 
     async function handleScheduleUpload(e) {
       const file = e.target.files[0];
-      if (file && currentUser) {
+      const studentIdNum = currentUser.idNumber || currentUser.id;
+      if (file && currentUser && studentIdNum) {
         const reader = new FileReader();
         reader.onload = async function(event) {
           const imgData = event.target.result;
@@ -419,7 +425,7 @@
 
           try {
             const { doc, setDoc } = window.firebaseModules;
-            await setDoc(doc(window.db, "students", currentUser.id), {
+            await setDoc(doc(window.db, "students", studentIdNum), {
               scheduleImg: imgData
             }, { merge: true });
             alert('Class schedule uploaded successfully to Firebase!');
@@ -447,15 +453,15 @@
     }
 
     async function checkDailySubmissionStatus() {
-      if (!currentUser || !window.db) return;
+      const studentIdNum = currentUser.idNumber || currentUser.id;
+      if (!currentUser || !window.db || !studentIdNum) return;
       const todayStr = new Date().toLocaleDateString();
-      const studentId = currentUser.id;
 
       try {
         const { collection, getDocs, query, where } = window.firebaseModules;
         const q = query(
           collection(window.db, "attendance"),
-          where("studentId", "==", studentId),
+          where("studentId", "==", studentIdNum),
           where("date", "==", todayStr),
           where("type", "==", selectedType)
         );
@@ -479,14 +485,13 @@
       }
     }
 
-    // --- FIREBASE ATTENDANCE SUBMISSION ---
     async function handleAttendanceSubmit(e) {
       e.preventDefault();
-      if (!currentUser || !window.db) return;
+      const studentIdNum = currentUser.idNumber || currentUser.id;
+      if (!currentUser || !window.db || !studentIdNum) return;
 
       const now = new Date();
       const todayStr = now.toLocaleDateString();
-      const studentId = currentUser.id;
       const submitBtn = document.getElementById('submitBtn');
 
       submitBtn.disabled = true;
@@ -495,10 +500,9 @@
       try {
         const { collection, addDoc, getDocs, query, where } = window.firebaseModules;
         
-        // Double-check kung na-submit na
         const q = query(
           collection(window.db, "attendance"),
-          where("studentId", "==", studentId),
+          where("studentId", "==", studentIdNum),
           where("date", "==", todayStr),
           where("type", "==", selectedType)
         );
@@ -532,7 +536,7 @@
           date: todayStr,
           time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           email,
-          studentId,
+          studentId: studentIdNum,
           firstName,
           middleInitial,
           lastName,
@@ -545,7 +549,6 @@
           createdAt: new Date()
         };
 
-        // Diretsong isinusulat sa Firestore collection na binabasa rin ng Faculty Dashboard
         await addDoc(collection(window.db, "attendance"), attendanceRecord);
 
         alert(`Attendance ${selectedType} Submitted Successfully to Firebase!`);
@@ -560,6 +563,7 @@
 
     async function renderCalendar() {
       const grid = document.getElementById('calendarDaysGrid');
+      if (!grid) return;
       grid.innerHTML = '';
 
       const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -584,12 +588,13 @@
       }
 
       let records = [];
-      if (window.db && currentUser) {
+      const studentIdNum = currentUser ? (currentUser.idNumber || currentUser.id) : null;
+      if (window.db && studentIdNum) {
         try {
           const { collection, getDocs, query, where } = window.firebaseModules;
           const q = query(
             collection(window.db, "attendance"),
-            where("studentId", "==", currentUser.id)
+            where("studentId", "==", studentIdNum)
           );
           const querySnapshot = await getDocs(q);
           querySnapshot.forEach(doc => {
