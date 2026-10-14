@@ -3,167 +3,272 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - TCU Smart Attendance System</title>
+  <title>Login - Smart Attendance Monitoring System</title>
   <style>
     :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --accent-red: #ed1c24;
-      --accent-gold: #fca311;
-      --accent-blue: #1a4da6;
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #334155;
+      --text-muted: #64748b;
+      --border: #cbd5e1;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-    header { background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); border-bottom: 2px solid var(--accent-red); position: sticky; top: 0; z-index: 100; }
-    nav { max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    .logo-container { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-weight: 700; }
-    .logo-container img { height: 48px; width: auto; object-fit: contain; }
-    .nav-links { display: flex; gap: 1.25rem; list-style: none; align-items: center; }
-    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--accent-gold); }
-    .btn-reg-nav { background-color: var(--accent-gold); color: #0d1117 !important; padding: 0.35rem 0.85rem; border-radius: 6px; font-weight: 600 !important; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
 
-    .main-container { max-width: 450px; margin: 3rem auto; width: 100%; padding: 0 1rem; flex: 1; }
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 2rem; }
-    .card-title { font-size: 1.5rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 0.5rem; }
-    .card-subtitle { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem; }
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
 
-    .role-switch { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
-    .role-btn { flex: 1; padding: 0.6rem; border: 1px solid var(--border-color); background: #0d1117; color: var(--text-secondary); font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; font-size: 0.9rem; }
-    .role-btn.active-student { background: var(--accent-gold); color: #0d1117; border-color: var(--accent-gold); }
-    .role-btn.active-faculty { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+    .header-logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
 
-    .form-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
-    .form-group label { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.3rem; }
-    .form-control { width: 100%; padding: 0.7rem; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; color: #fff; font-size: 0.875rem; outline: none; }
-    .form-control:focus { border-color: var(--accent-gold); }
+    .header-logo h1 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.3rem;
+    }
 
-    .btn-submit { width: 100%; padding: 0.8rem; background: var(--accent-gold); color: #0d1117; border: none; border-radius: 6px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; }
-    .btn-submit:hover { background: #e0920a; }
+    .header-logo p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
 
-    .switch-mode { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary); }
-    .switch-mode a { color: var(--accent-gold); text-decoration: none; font-weight: 600; }
+    .role-selector {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+
+    .role-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0.65rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .role-btn.active {
+      background: #ffffff;
+      color: var(--accent);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    .footer-links {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <nav>
-      <a href="index.html" class="logo-container">
-        <img src="TCU_logo_2024.png" alt="TCU Logo">
-        <span>TCU Attendance</span>
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="registerpageproject.html" class="btn-reg-nav">Register</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main class="main-container">
-    <div class="card">
-      <h2 class="card-title" id="loginTitle">Student Login</h2>
-      <p class="card-subtitle" id="loginSubtitle">Enter your credentials to access your attendance portal</p>
-
-      <div class="role-switch">
-        <div class="role-btn active-student" id="btnStudent" onclick="switchLoginRole('student')">Student</div>
-        <div class="role-btn" id="btnFaculty" onclick="switchLoginRole('faculty')">Faculty</div>
-      </div>
-
-      <form id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label id="emailLabel">TCU Email or Student ID</label>
-          <input type="text" id="logUser" class="form-control" placeholder="username@tcu.edu.ph or ID" required>
-        </div>
-
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="logPass" class="form-control" placeholder="••••••••" required>
-        </div>
-
-        <button type="submit" class="btn-submit" id="logSubmitBtn">Login as Student</button>
-      </form>
-
-      <div class="switch-mode">
-        Don't have an account? <a href="registerpageproject.html">Register here</a>
-      </div>
+  <div class="container">
+    <div class="header-logo">
+      <h1>Smart Attendance</h1>
+      <p>Sign in to your portal</p>
     </div>
-  </main>
 
-  <script>
+    <!-- Role Switcher -->
+    <div class="role-selector">
+      <button type="button" class="role-btn active" id="btnStudent" onclick="switchRole('student')">Student</button>
+      <button type="button" class="role-btn" id="btnFaculty" onclick="switchRole('faculty')">Faculty</button>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label id="identifierLabel" for="logUser">Student ID or Email</label>
+        <input type="text" id="logUser" placeholder="Enter ID number or email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="logPass">Password</label>
+        <input type="password" id="logPass" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">Sign In as Student</button>
+    </form>
+
+    <div class="footer-links">
+      Don't have an account? <a href="registerpageproject.html">Register here</a>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs & Login Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAUe90Z8XTSKSPJNwFEsV41ZQnv-oUGRmA",
+      authDomain: "smart-attendance-68397.firebaseapp.com",
+      projectId: "smart-attendance-68397",
+      storageBucket: "smart-attendance-68397.firebasestorage.app",
+      messagingSenderId: "47063749826",
+      appId: "1:47063749826:web:06b25a63b19836d009575b",
+      measurementId: "G-KBPYMMT4B1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     let currentLoginRole = 'student';
 
-    function switchLoginRole(role) {
+    window.switchRole = function(role) {
       currentLoginRole = role;
-      const btnStu = document.getElementById('btnStudent');
-      const btnFac = document.getElementById('btnFaculty');
-      const title = document.getElementById('loginTitle');
-      const sub = document.getElementById('loginSubtitle');
-      const emailLbl = document.getElementById('emailLabel');
-      const subBtn = document.getElementById('logSubmitBtn');
+      const btnStudent = document.getElementById('btnStudent');
+      const btnFaculty = document.getElementById('btnFaculty');
+      const identifierLabel = document.getElementById('identifierLabel');
+      const logUser = document.getElementById('logUser');
+      const submitBtn = document.getElementById('submitBtn');
 
       if (role === 'student') {
-        btnStu.className = 'role-btn active-student';
-        btnFac.className = 'role-btn';
-        title.textContent = 'Student Login';
-        sub.textContent = 'Enter your credentials to access your attendance portal';
-        emailLbl.textContent = 'TCU Email or Student ID';
-        subBtn.textContent = 'Login as Student';
-        subBtn.style.background = '#fca311';
-        subBtn.style.color = '#0d1117';
+        btnStudent.classList.add('active');
+        btnFaculty.classList.remove('active');
+        identifierLabel.textContent = 'Student ID or Email';
+        logUser.placeholder = 'Enter student ID or email';
+        submitBtn.textContent = 'Sign In as Student';
       } else {
-        btnFac.className = 'role-btn active-faculty';
-        btnStu.className = 'role-btn';
-        title.textContent = 'Faculty Login';
-        sub.textContent = 'Enter your credentials to access faculty panel';
-        emailLbl.textContent = 'TCU Email or Faculty ID';
-        subBtn.textContent = 'Login as Faculty';
-        subBtn.style.background = '#1a4da6';
-        subBtn.style.color = '#fff';
+        btnFaculty.classList.add('active');
+        btnStudent.classList.remove('active');
+        identifierLabel.textContent = 'Faculty ID or Email';
+        logUser.placeholder = 'Enter faculty ID or email';
+        submitBtn.textContent = 'Sign In as Faculty';
       }
-    }
+    };
 
-    function handleLogin(e) {
+    window.handleLogin = async function(e) {
       e.preventDefault();
       const identifier = document.getElementById('logUser').value.trim();
       const pass = document.getElementById('logPass').value;
 
-      if (currentLoginRole === 'student') {
-        const students = JSON.parse(localStorage.getItem('tcu_registered_students')) || [];
+      const collectionName = currentLoginRole === 'student' ? 'students' : 'faculty';
+
+      try {
+        const querySnapshot = await getDocs(collection(db, collectionName));
+        let foundUser = null;
         
-        const found = students.find(s => (s.email === identifier || s.id === identifier) && s.pass === pass);
-        
-        if (!found) {
-          alert('Invalid Student ID/Email or Password. Please check your credentials or register first.');
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.email === identifier || data.idNumber === identifier) {
+            foundUser = { id: doc.id, ...data };
+          }
+        });
+
+        if (!foundUser) {
+          alert(`Invalid ${currentLoginRole === 'student' ? 'Student' : 'Faculty'} ID/Email or account not found in database.`);
           return;
         }
 
-        // Save active user session
-        localStorage.setItem('tcu_student_user', JSON.stringify(found));
-        alert('Login successful! Redirecting to student portal...');
-        window.location.href = 'studentprojectpage.html';
-
-      } else {
-        const facultyList = JSON.parse(localStorage.getItem('tcu_registered_faculty')) || [];
-        
-        const found = facultyList.find(f => (f.email === identifier || f.id === identifier) && f.pass === pass);
-        
-        if (!found) {
-          alert('Invalid Faculty ID/Email or Password. Please check your credentials.');
+        // Simpleng password match (maaari mong palitan kung gumamit ka ng hashing)
+        if (foundUser.password && foundUser.password !== pass) {
+          alert('Incorrect password. Please try again.');
           return;
         }
 
-        // Save active faculty session
-        localStorage.setItem('tcu_faculty_user', JSON.stringify(found));
-        alert('Login successful! Redirecting to faculty portal...');
-        window.location.href = 'facultypageproject.html'; // Adjust filename if your faculty dashboard differs
+        if (currentLoginRole === 'student') {
+          localStorage.setItem('tcu_student_user', JSON.stringify(foundUser));
+          alert('Login successful! Redirecting to student portal...');
+          window.location.href = 'studentprojectpage.html';
+        } else {
+          localStorage.setItem('tcu_faculty_user', JSON.stringify(foundUser));
+          alert('Login successful! Redirecting to faculty portal...');
+          window.location.href = 'facultypageproject.html';
+        }
+
+      } catch (error) {
+        console.error("Login error: ", error);
+        alert("Failed to connect to database during login. Please try again.");
       }
-    }
+    };
   </script>
 </body>
 </html>
