@@ -34,8 +34,21 @@
     .welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
     .student-badge { background: rgba(237, 28, 36, 0.2); color: var(--badge-text); border: 1px solid #ed1c24; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
+    /* Profile Section Styles */
+    .profile-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+    .profile-img-container { position: relative; width: 130px; height: 130px; border-radius: 50%; overflow: hidden; border: 3px solid var(--accent-color); background: #0d1117; flex-shrink: 0; }
+    .profile-img-container img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-upload-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); text-align: center; padding: 4px 0; cursor: pointer; font-size: 0.75rem; color: #fca311; font-weight: 600; }
+    .profile-info { flex: 1; min-width: 250px; }
+    .profile-info h3 { font-size: 1.25rem; color: #fff; margin-bottom: 0.25rem; }
+    .profile-info p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .bio-textarea { width: 100%; background: #0d1117; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; padding: 0.5rem; font-size: 0.85rem; resize: vertical; min-height: 60px; outline: none; margin-top: 0.5rem; }
+    .bio-textarea:focus { border-color: #fca311; }
+    .btn-save-bio { background: #fca311; color: #0d1117; border: none; padding: 0.35rem 0.85rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-top: 0.4rem; }
+    .btn-save-bio:hover { background: #e0920a; }
+
     .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } .profile-card { flex-direction: column; text-align: center; justify-content: center; } }
 
     .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
@@ -108,6 +121,26 @@
         <p id="student-info-sub">Student ID: Loading... | Email: Loading...</p>
       </div>
       <span class="student-badge" id="student-course-badge">BS Information Systems</span>
+    </div>
+
+    <!-- STUDENT PROFILE SECTION -->
+    <div class="profile-card">
+      <div class="profile-img-container">
+        <img id="profilePicture" src="https://via.placeholder.com/150?text=Profile" alt="Student Profile Picture">
+        <div class="profile-upload-overlay" onclick="document.getElementById('profileImgInput').click()">
+          📷 Upload
+        </div>
+        <input type="file" id="profileImgInput" accept="image/*" style="display: none;" onchange="handleProfilePictureUpload(event)">
+      </div>
+
+      <div class="profile-info">
+        <h3 id="profileFullName">Adrianne Rey Cadangan</h3>
+        <p id="profileMeta">BS Information Systems | Student ID: 2026-100234</p>
+        
+        <label style="font-size: 0.8rem; font-weight: 600; color: #cbd5e1;">About Me:</label>
+        <textarea id="aboutMeInput" class="bio-textarea" placeholder="Tell something about yourself (e.g., interests, goals, skills)..."></textarea>
+        <button class="btn-save-bio" onclick="saveAboutMe()">Save About Me</button>
+      </div>
     </div>
 
     <!-- Schedule Viewer Section -->
@@ -244,6 +277,10 @@
       document.getElementById('student-info-sub').textContent = `Student ID: ${currentUser.id} | Email: ${currentUser.email}`;
       document.getElementById('student-course-badge').textContent = currentUser.department || 'BS Information Systems';
       
+      // Update Profile Card text
+      document.getElementById('profileFullName').textContent = currentUser.name;
+      document.getElementById('profileMeta').textContent = `${currentUser.department || 'BS Information Systems'} | Student ID: ${currentUser.id}`;
+
       document.getElementById('email').value = currentUser.email || '';
       document.getElementById('studentId').value = currentUser.id || '';
       
@@ -255,6 +292,7 @@
         document.getElementById('firstName').value = currentUser.name;
       }
 
+      loadProfileData();
       loadSavedScheduleImage();
       checkDailySubmissionStatus();
       renderCalendar();
@@ -263,6 +301,39 @@
     function updateLiveTimestamp() {
       const now = new Date();
       document.getElementById('autoTimestamp').value = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+    }
+
+    /* PROFILE FUNCTIONS */
+    function handleProfilePictureUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const imgData = event.target.result;
+          document.getElementById('profilePicture').src = imgData;
+          localStorage.setItem('tcu_student_profile_img', imgData);
+          alert('Profile picture updated successfully!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveAboutMe() {
+      const bioText = document.getElementById('aboutMeInput').value;
+      localStorage.setItem('tcu_student_about_me', bioText);
+      alert('About Me updated successfully!');
+    }
+
+    function loadProfileData() {
+      const savedImg = localStorage.getItem('tcu_student_profile_img');
+      if (savedImg) {
+        document.getElementById('profilePicture').src = savedImg;
+      }
+
+      const savedBio = localStorage.getItem('tcu_student_about_me');
+      if (savedBio) {
+        document.getElementById('aboutMeInput').value = savedBio;
+      }
     }
 
     function setAttendanceType(type) {
@@ -440,7 +511,7 @@
 
     function logout() {
       localStorage.removeItem('tcu_student_user');
-      window.location.href = 'registerpageproject.html'; // Naka-ayos na dito
+      window.location.href = 'registerpageproject.html';
     }
   </script>
 </body>
