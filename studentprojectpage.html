@@ -298,7 +298,6 @@
     let selectedType = 'SIGN_IN';
     let currentUser = null;
 
-    // Structured Departments and Courses List
     const departmentCourses = {
       "CICT": ["Information Systems", "Computer Science"],
       "CCJ": ["Criminology"],
@@ -347,7 +346,6 @@
     function initApp() {
       if (currentUser && window.db) {
         loadProfileFromFirebase();
-        checkDailySubmissionStatus();
         renderCalendar();
       }
     }
@@ -368,7 +366,6 @@
       document.getElementById('email').value = currentUser.email || '';
       document.getElementById('studentId').value = studentIdNum;
 
-      // Auto-select department & course in form
       document.getElementById('departmentSelect').value = studentDept;
       updateCourseOptions(studentCourse);
       
@@ -382,7 +379,6 @@
 
       if (window.db) {
         loadProfileFromFirebase();
-        checkDailySubmissionStatus();
         renderCalendar();
       }
     }
@@ -499,40 +495,6 @@
         btnOut.className = 'type-btn active-out';
         btnIn.className = 'type-btn';
       }
-      checkDailySubmissionStatus();
-    }
-
-    async function checkDailySubmissionStatus() {
-      const studentIdNum = currentUser.studentId || currentUser.idNumber || currentUser.id;
-      if (!currentUser || !window.db || !studentIdNum) return;
-      const todayStr = new Date().toLocaleDateString();
-
-      try {
-        const { collection, getDocs, query, where } = window.firebaseModules;
-        const q = query(
-          collection(window.db, "attendance"),
-          where("studentId", "==", studentIdNum),
-          where("date", "==", todayStr),
-          where("type", "==", selectedType)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (!querySnapshot.empty) {
-          submitBtn.disabled = true;
-          submitBtn.style.background = '#475569';
-          submitBtn.style.cursor = 'not-allowed';
-          submitBtn.textContent = `Already Submitted for ${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'} Today`;
-        } else {
-          submitBtn.disabled = false;
-          submitBtn.style.background = '#fca311';
-          submitBtn.style.cursor = 'pointer';
-          submitBtn.textContent = `Submit Attendance (${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'})`;
-        }
-      } catch (err) {
-        console.error("Error checking submission status:", err);
-      }
     }
 
     async function handleAttendanceSubmit(e) {
@@ -548,21 +510,7 @@
       submitBtn.textContent = "Submitting to Cloud...";
 
       try {
-        const { collection, addDoc, getDocs, query, where } = window.firebaseModules;
-        
-        const q = query(
-          collection(window.db, "attendance"),
-          where("studentId", "==", studentIdNum),
-          where("date", "==", todayStr),
-          where("type", "==", selectedType)
-        );
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          alert(`Multiple submissions restricted! You have already submitted your ${selectedType} today.`);
-          checkDailySubmissionStatus();
-          return;
-        }
+        const { collection, addDoc } = window.firebaseModules;
 
         const timestamp = document.getElementById('autoTimestamp').value;
         const department = document.getElementById('departmentSelect').value;
@@ -597,13 +545,20 @@
 
         await addDoc(collection(window.db, "attendance"), attendanceRecord);
 
-        alert(`Attendance ${selectedType} Submitted Successfully to Firebase!`);
-        checkDailySubmissionStatus();
+        alert(`Attendance ${selectedType} Submitted Successfully for ${subjectCode}!`);
+        
+        // Reset submit button state
+        submitBtn.disabled = false;
+        submitBtn.style.background = '#fca311';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.textContent = `Submit Attendance (${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'})`;
+
         renderCalendar();
       } catch (err) {
         console.error("Error submitting attendance:", err);
         alert("Error recording attendance. Please try again.");
         submitBtn.disabled = false;
+        submitBtn.textContent = `Submit Attendance (${selectedType === 'SIGN_IN' ? 'Sign In' : 'Sign Out'})`;
       }
     }
 
